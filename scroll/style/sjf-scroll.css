@@ -1,0 +1,15 @@
+.sjf-scroll-bg {
+  position: absolute;
+  width: 10px;
+  border-radius: 5px;
+  background: #f5f5f5;
+}
+
+.sjf-scroll-content {
+  position: absolute;
+  width: 10px;
+  border-radius: 5px;
+  background: #ccc;
+  left: 0px;
+  top: 0px;
+}
