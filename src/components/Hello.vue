@@ -1,8 +1,7 @@
 <template>
   <div class="hello">
-    <div class="sjf-scroll" min-height="150">
+    <div class="sjf-scroll" max-height="150">
       <!-- <p v-for="list in lists" v-text="list"></p> -->
-      <p>1</p>
       <p>1</p>
       <p>1</p>
       <p>1</p>
@@ -22,12 +21,12 @@ export default {
   name: 'hello',
   data () {
     return {
-      lists: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+      lists: [0, 1, 2, 3, 4, 5, 6, 7, 8]
     }
   },
   created () {
     sjfScroll.setScroll()
-    sjfScroll.watch(sjfScroll.options)
+    sjfScroll.setOptions({isShow: true, delay: 6000})
   }
 }
 </script>
