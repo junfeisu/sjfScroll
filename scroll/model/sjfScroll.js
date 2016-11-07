@@ -12,7 +12,7 @@
    * @param delay is the time to deal the mouse events on the scroll-container
    */
   var options = {
-    delay: 2000,
+    delay: 1000,
     gradient: 10
   }
 
@@ -59,7 +59,9 @@
     scrolls.forEach(value => {
       var maxHeight = value.getAttribute('max-height')
       if (maxHeight === null) {
-        console.error('sjf-scroll: [error] please add a attribute["max-height": (value)&int] on ".sjf-scroll" && max-height >= 100')
+        console.error('sjf-scroll: [error]' + 
+          'please add a attribute["max-height": (value)&int] on ".sjf-scroll"' + 
+          '&& max-height >= 100')
       } else {
         +maxHeight < 100 ? 
           console.warn('sjf-scroll: [warn] the value of max-height should be above or equal 100') : 
@@ -70,7 +72,8 @@
 
   function rewriteDom (obj, maxHeight) {
     var initHtml = obj.innerHTML
-    initHtml = '<div class="sjf-scroll-wrapper"><div class="sjf-scroll-body">' + initHtml + '</div><div class="sjf-scroll-bg"><span class="sjf-scroll-content"></span></div>'
+    initHtml = '<div class="sjf-scroll-wrapper"><div class="sjf-scroll-body">' + initHtml + 
+      '</div><div class="sjf-scroll-bg"><span class="sjf-scroll-content"></span></div>'
     obj.innerHTML = initHtml
     
     var wrapper = obj.querySelector('.sjf-scroll-wrapper')
@@ -130,7 +133,8 @@
 
   function setOptions (option) {
     if (!isObject(option)) {
-      console.error('sjf-scroll:[error] options must be a object but ' + JSON.stringify(option) + ' is not a object')
+      console.error('sjf-scroll:[error] options must be a object but ' + 
+        JSON.stringify(option) + ' is not a object')
       return
     }
     for (let prop in option) {
@@ -150,9 +154,9 @@
     var newEvent = event || window.event
     var len = newEvent.clientY - disY
     if (len < 0) {
-        len = 0;
+      len = 0;
     } else if (len > relative.bg.offsetHeight - relative.content.offsetHeight) {
-        len = relative.bg.offsetHeight - relative.content.offsetHeight
+      len = relative.bg.offsetHeight - relative.content.offsetHeight
     }
     relative.content.style.top = len + 'px';
     relative.body.style.top = -len * (relative.body.offsetHeight / relative.self.offsetHeight) + 'px'
@@ -165,25 +169,26 @@
     var newEvent = event || window.event
     var direction = newEvent.detail || newEvent.wheelDelta;
     newEvent.preventDefault ? newEvent.preventDefault : newEvent.returnValue = false
+    var distance = relative.bg.offsetHeight - relative.content.offsetHeight - options.gradient
     if (direction <= 0) {
-        if (scrollOption.cTop >= relative.bg.offsetHeight - relative.content.offsetHeight - options.gradient) {
-            scrollOption.cTop = relative.bg.offsetHeight - relative.content.offsetHeight;
-            scrollOption.oTop = -(scrollOption.cTop / relative.body.offsetHeight * relative.self.offsetHeight);
-        } else {
-            scrollOption.oTop -= options.gradient / relative.body.offsetHeight * relative.self.offsetHeight;
-            scrollOption.cTop += options.gradient;
-        }
+      if (scrollOption.cTop >= distance) {
+        scrollOption.cTop = relative.bg.offsetHeight - relative.content.offsetHeight
+        scrollOption.oTop = -(relative.body.offsetHeight - relative.self.offsetHeight)
+      } else {
+        scrollOption.oTop -= options.gradient * (relative.body.offsetHeight / relative.self.offsetHeight)
+        scrollOption.cTop += options.gradient
+      }
     } else {
-        if (scrollOption.cTop <= options.gradient) {
-            scrollOption.cTop = 0;
-            scrollOption.oTop = 0;
-        } else {
-            scrollOption.oTop += options.gradient / relative.body.offsetHeight * relative.self.offsetHeight;
-            scrollOption.cTop -= options.gradient;
-        }
+      if (scrollOption.cTop <= options.gradient) {
+        scrollOption.cTop = 0
+        scrollOption.oTop = 0
+      } else {
+        scrollOption.oTop += options.gradient * (relative.body.offsetHeight / relative.self.offsetHeight)
+        scrollOption.cTop -= options.gradient
+      }
     }
-    relative.body.style.top = scrollOption.oTop + 'px';
-    relative.content.style.top = scrollOption.cTop + 'px';
+    relative.body.style.top = scrollOption.oTop + 'px'
+    relative.content.style.top = scrollOption.cTop + 'px'
   }
 
   var operate = {
