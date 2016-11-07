@@ -39,12 +39,13 @@
     var offsetHeight = obj.offsetHeight || obj.clientHeight
     var initHtml = obj.innerHTML
 
+    offsetHeight > maxHeight ? options.isShow = true : options.isShow = false
     initHtml = '<div class="sjf-scroll-wrapper"><div class="sjf-scroll">' + initHtml + '</div><div class="sjf-scroll-bg"><span class="sjf-scroll-content"></span></div>'
     parent.innerHTML = initHtml
     console.log(initHtml)
     console.log(document.querySelector('.hello'))
+    debugger
 
-    offsetHeight > maxHeight ? options.isShow = true : options.isShow = false
   }
 
   /*
@@ -59,7 +60,6 @@
           return val
         },
         set: (function (newValue) {
-          console.log('the key is ' + key)
           dealOptions(newValue)
         }).bind(this)
       })
@@ -102,12 +102,11 @@
   // init the sjf-scroll
   function initScroll () {
     watchOptions(options)
+    getMaxHeight()
   }
 
-  initScroll()
-
   return {
-    setScroll: getMaxHeight,
+    initScroll: initScroll,
     setOptions: setOptions
   }
 })
