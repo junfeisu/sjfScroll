@@ -12,7 +12,7 @@ export default {
   name: 'hello',
   data () {
     return {
-      lists: [0, 1, 2, 3, 4, 5, 6, 7, 8]
+      lists: [0, 1, 2, 3, 4, 5, 6, 7]
     }
   },
   mounted () {
@@ -24,4 +24,12 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss" scoped>
   @import './../../scroll/style/sjf-scroll.css';
+  .hello {
+    display: flex;
+    justify-content: center;
+  }
+
+  .sjf-scroll {
+    width: 50%;
+  }
 </style>
