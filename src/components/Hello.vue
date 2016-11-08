@@ -3,9 +3,6 @@
     <div class="sjf-scroll" max-height="150">
       <p v-for="list in lists" v-text="list"></p>
     </div>
-    <div class="sjf-scroll" max-height="200">
-      <p v-for="list in lists" v-text="list"></p>
-    </div>
   </div>
 </template>
 

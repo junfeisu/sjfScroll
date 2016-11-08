@@ -29,12 +29,12 @@
   }
 
   function getRelativeEle (obj) {
-    var ele = {}
-    ele.body = obj.querySelector('.sjf-scroll-body')
-    ele.bg = obj.querySelector('.sjf-scroll-bg')
-    ele.content = obj.querySelector('.sjf-scroll-content')
-    ele.self = obj
-    return ele
+    return {
+      body: obj.querySelector('.sjf-scroll-body'),
+      bg: obj.querySelector('.sjf-scroll-bg'),
+      content: obj.querySelector('.sjf-scroll-content'),
+      self: obj
+    }
   }
 
   /*
@@ -51,10 +51,10 @@
     }
   }
 
-  
+  // get the living example entrance of sjf-scroll
   function getMaxHeight () {
     var scrolls = document.querySelectorAll('.sjf-scroll')
-    scrolls.forEach(value => {
+    Array.prototype.forEach.call(scrolls, value => {
       var maxHeight = value.getAttribute('max-height')
       if (maxHeight === null) {
         console.error('sjf-scroll: [error]' + 
@@ -87,8 +87,8 @@
     wrapper.style.height = maxHeight + 'px'
     bg.style.height = maxHeight + 'px'
     content.style.height = (maxHeight * maxHeight) / offsetHeight + 'px'
-    wrapper.onmouseover = function () {
-      operate.over(wrapper)
+    wrapper.onmouseover = function (event) {
+      operate.over(wrapper, event)
     }
 
     content.onmousedown = function (event) {
@@ -161,9 +161,10 @@
     } else if (len > relative.bg.offsetHeight - relative.content.offsetHeight) {
       len = relative.bg.offsetHeight - relative.content.offsetHeight
     }
-    relative.content.style.top = len + 'px';
-    relative.body.style.top = -len * 
-      (relative.body.offsetHeight / relative.self.offsetHeight) + 'px'
+    relative.content.style.top = position.cTop + len + 'px'
+    relative.body.style.top = position.oTop - len * (relative.body.offsetHeight / relative.self.offsetHeight) + 'px'
+    position.cTop = len
+    position.oTop = -len * (relative.body.offsetHeight / relative.self.offsetHeight)
   }
 
   /*
@@ -173,13 +174,12 @@
     var newEvent = event || window.event
     newEvent.stopPropagation ? newEvent.stopPropagation() : newEvent.cancelBubble = true
     newEvent.preventDefault ? newEvent.preventDefault() : newEvent.returnValue = false
-    var direction = newEvent.detail || newEvent.wheelDelta
 
+    var direction = newEvent.detail || newEvent.wheelDelta
     var bgHeight = relative.bg.offsetHeight
     var bodyHeight = relative.body.offsetHeight
     var contentHeight = relative.content.offsetHeight
     var selfHeight = relative.self.offsetHeight
-
     var distance = bgHeight - contentHeight - options.gradient
     if (direction <= 0) {
       if (position.cTop >= distance) {
@@ -231,23 +231,20 @@
       document.onmouseup = null
     },
     wheel: function (obj, event) {
+      var newEvent = event || window.event
       var relative = getRelativeEle(obj)
-      var disY = event.clientY - relative.bg.scrollTop
+      var disY = newEvent.clientY - relative.bg.scrollTop
       var navigator = navigator || window.navigator
-      if (navigator.userAgent.toLowerCase().indexOf('firexfox') < 0) {
-        relative.self.onmousewheel = function (event) {
-          changeLocation(relative, event)
+      if (navigator.userAgent.toLowerCase().indexOf('firefox') < 0) {
+        relative.self.onmousewheel = function (ev) {
+          changeLocation(relative, ev)
         }
       } else {
-        obj.addEventListener('DOMMouseScroll', function (event) {
-          changeLocation(relative, event)
+        obj.addEventListener('DOMMouseScroll', function (ev) {
+          changeLocation(relative, ev)
         })
       }
     }
-  }
-
-  document.onmousewheel = function () {
-    console.log('wheel')
   }
 
   // init the sjf-scroll
