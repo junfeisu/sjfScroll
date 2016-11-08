@@ -3,6 +3,9 @@
     <div class="sjf-scroll" max-height="150">
       <p v-for="list in lists" v-text="list"></p>
     </div>
+    <div class="sjf-scroll" max-height="200">
+      <p v-for="list in lists" v-text="list"></p>
+    </div>
   </div>
 </template>
 
@@ -12,7 +15,7 @@ export default {
   name: 'hello',
   data () {
     return {
-      lists: [0, 1, 2, 3, 4, 5, 6, 7]
+      lists: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     }
   },
   mounted () {

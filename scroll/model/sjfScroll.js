@@ -16,7 +16,7 @@
     gradient: 10
   }
 
-  var scrollOption = {
+  var position = {
     cTop: 0,
     oTop: 0
   }
@@ -51,9 +51,7 @@
     }
   }
 
-  /*
-   * rewrite the DOM structure of sjf-scroll
-   */
+  
   function getMaxHeight () {
     var scrolls = document.querySelectorAll('.sjf-scroll')
     scrolls.forEach(value => {
@@ -70,6 +68,9 @@
     })
   }
 
+  /*
+   * rewrite the DOM structure of sjf-scroll
+   */
   function rewriteDom (obj, maxHeight) {
     var initHtml = obj.innerHTML
     initHtml = '<div class="sjf-scroll-wrapper"><div class="sjf-scroll-body">' + initHtml + 
@@ -131,6 +132,7 @@
     console.log('the new val is ' + val)
   }
 
+  // The interface for users to set options
   function setOptions (option) {
     if (!isObject(option)) {
       console.error('sjf-scroll:[error] options must be a object but ' + 
@@ -146,9 +148,10 @@
     }
   }
 
-
   /*
    * This is to deal the scroll move 
+   * @param relative is a object of the assembly of element which is relatived to the scroll event
+   * @param disY is the distance of the vertical direction between mouse and .sjf-scroll-bg'scrollTop
    */
   function scroll (relative, event, disY) {
     var newEvent = event || window.event
@@ -159,7 +162,8 @@
       len = relative.bg.offsetHeight - relative.content.offsetHeight
     }
     relative.content.style.top = len + 'px';
-    relative.body.style.top = -len * (relative.body.offsetHeight / relative.self.offsetHeight) + 'px'
+    relative.body.style.top = -len * 
+      (relative.body.offsetHeight / relative.self.offsetHeight) + 'px'
   }
 
   /*
@@ -167,30 +171,40 @@
    */
   function changeLocation (relative, event) {
     var newEvent = event || window.event
-    var direction = newEvent.detail || newEvent.wheelDelta;
-    newEvent.preventDefault ? newEvent.preventDefault : newEvent.returnValue = false
-    var distance = relative.bg.offsetHeight - relative.content.offsetHeight - options.gradient
+    newEvent.stopPropagation ? newEvent.stopPropagation() : newEvent.cancelBubble = true
+    newEvent.preventDefault ? newEvent.preventDefault() : newEvent.returnValue = false
+    var direction = newEvent.detail || newEvent.wheelDelta
+
+    var bgHeight = relative.bg.offsetHeight
+    var bodyHeight = relative.body.offsetHeight
+    var contentHeight = relative.content.offsetHeight
+    var selfHeight = relative.self.offsetHeight
+
+    var distance = bgHeight - contentHeight - options.gradient
     if (direction <= 0) {
-      if (scrollOption.cTop >= distance) {
-        scrollOption.cTop = relative.bg.offsetHeight - relative.content.offsetHeight
-        scrollOption.oTop = -(relative.body.offsetHeight - relative.self.offsetHeight)
+      if (position.cTop >= distance) {
+        position.cTop = bgHeight - contentHeight
+        position.oTop = -(bodyHeight - selfHeight)
       } else {
-        scrollOption.oTop -= options.gradient * (relative.body.offsetHeight / relative.self.offsetHeight)
-        scrollOption.cTop += options.gradient
+        position.oTop -= options.gradient * (bodyHeight / selfHeight)
+        position.cTop += options.gradient
       }
     } else {
-      if (scrollOption.cTop <= options.gradient) {
-        scrollOption.cTop = 0
-        scrollOption.oTop = 0
+      if (position.cTop <= options.gradient) {
+        position.cTop = 0
+        position.oTop = 0
       } else {
-        scrollOption.oTop += options.gradient * (relative.body.offsetHeight / relative.self.offsetHeight)
-        scrollOption.cTop -= options.gradient
+        position.oTop += options.gradient * (bodyHeight / selfHeight)
+        position.cTop -= options.gradient
       }
     }
-    relative.body.style.top = scrollOption.oTop + 'px'
-    relative.content.style.top = scrollOption.cTop + 'px'
+    relative.body.style.top = position.oTop + 'px'
+    relative.content.style.top = position.cTop + 'px'
   }
 
+  /*
+   * the series of mouse events on scroll object 
+   */
   var operate = {
     down: function (obj, event) {
       var event = event || window.event
@@ -230,6 +244,10 @@
         })
       }
     }
+  }
+
+  document.onmousewheel = function () {
+    console.log('wheel')
   }
 
   // init the sjf-scroll
