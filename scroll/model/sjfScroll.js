@@ -19,8 +19,8 @@
   var position = {
     cTop: 0,
     oTop: 0,
-    oldClientY: 0,
     isFirst: true,
+    oldClientY: 0,
     isSpecial: false
   }
 
@@ -161,62 +161,35 @@
    * @param disY is the distance of the vertical direction between mouse and 
       .sjf-scroll-bg's scrollTop
    */
-  function scroll (relative, event, disY) {
+  function scroll (relative, event) {
     var len
     var newEvent = event || window.event
     var initTop = relative.self.offsetTop
-    if (position.isFirst) {
-      position.cTop > 0 ? position.isSpecial = true : position.isSpecial = false
+    if (position.isFirst){
+     position.cTop > 0 ? position.isSpecial = true : position.isSpecial = false
     }
-    var diff = newEvent.clientY - position.oldClientY
     
     var bodyHeight = relative.body.offsetHeight
     var selfHeight = relative.self.offsetHeight
     var contentHeight = relative.content.offsetHeight
-
-    if (position.isSpecial) {
-      console.log('special')
-      if (diff > 0) {
-        console.log('down')
-        len = newEvent.clientY - disY
-        len = check(len, relative)
-        position.cTop += len
-        position.oTop -= len * (bodyHeight / selfHeight)
-      } else {
-        console.log('up')
-        len = disY - newEvent.clientY
-        len = check(len, relative)
-        position.cTop -= len
-        position.oTop += len * (bodyHeight / selfHeight)
-      }
-    } else {
-      console.log('normal')
-      len = newEvent.clientY - disY
-      len = checkBoundary(len, relative)
-      position.cTop = len
-      position.oTop = -len * (bodyHeight / selfHeight)
-    }
-    position.oldClientY = newEvent.clientY
+    len = newEvent.clientY - position.oldClientY
+    len = checkBoundary(len, relative)
+    position.cTop += len
+    position.oTop -= len * (bodyHeight / selfHeight)
     relative.content.style.top = position.cTop + 'px'
     relative.body.style.top = position.oTop + 'px'
     position.isFirst = false
-  }
-
-  function check (len, relative) {
-    if (len >= position.cTop) {
-      len = position.cTop
-    } else if (len >= relative.bg.offsetHeight - relative.content.offsetHeight - position.cTop) {
-      len = relative.bg.offsetHeight - relative.content.offsetHeight - position.cTop
-    }
-    return len
+    position.oldClientY = newEvent.clientY
   }
 
   // check is to reach the boundary
   function checkBoundary (len, relative) {
-    if (len <= 0) {
-      len = 0
-    } else if (len > relative.bg.offsetHeight - relative.content.offsetHeight) {
-      len = relative.bg.offsetHeight - relative.content.offsetHeight
+    if (len <= -position.cTop) {
+      console.log('over min')
+      len = -position.cTop
+    } else if (len >= relative.bg.offsetHeight - relative.content.offsetHeight - position.cTop) {
+      console.log('over max')
+      len = relative.bg.offsetHeight - relative.content.offsetHeight - position.cTop
     }
     return len
   }
@@ -270,9 +243,11 @@
       var event = event || window.event
       var relative = getRelativeEle(obj)
       var disY = event.clientY - relative.bg.scrollTop
+      position.isSpecial = false
       position.isFirst = true
+      position.oldClientY = disY
       document.onmousemove = function (ev) {
-        operate.move(ev, relative, disY)
+        operate.move(ev, relative)
       }
       document.onmouseup = function () {
         operate.up()
