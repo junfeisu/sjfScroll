@@ -18,7 +18,10 @@
 
   var position = {
     cTop: 0,
-    oTop: 0
+    oTop: 0,
+    oldClientY: 0,
+    isFirst: true,
+    isSpecial: false
   }
 
   // Determine whether as an object
@@ -58,7 +61,7 @@
       var maxHeight = value.getAttribute('max-height')
       if (maxHeight === null) {
         console.error('sjf-scroll: [error]' + 
-          'please add a attribute["max-height": (value)&int] on ".sjf-scroll"' + 
+          'please add a attribute["max-height": value&int] on ".sjf-scroll"' + 
           '&& max-height >= 100')
       } else {
         +maxHeight < 100 ? 
@@ -91,8 +94,12 @@
       operate.over(wrapper, event)
     }
 
+    bg.onclick = function (event) {
+      operate.click(event, obj)
+    }
+
     content.onmousedown = function (event) {
-      operate.down(wrapper, event)
+      operate.down(obj, event)
     }
   }
 
@@ -118,7 +125,7 @@
         set: (function (newValue) {
           dealOptions(newValue)
         }).bind(this)
-      })
+      }) 
       if (Object.prototype.toString.call(obj[key]) === '[object Object]') {
         observe(obj[key])
       }
@@ -151,20 +158,67 @@
   /*
    * This is to deal the scroll move 
    * @param relative is a object of the assembly of element which is relatived to the scroll event
-   * @param disY is the distance of the vertical direction between mouse and .sjf-scroll-bg'scrollTop
+   * @param disY is the distance of the vertical direction between mouse and 
+      .sjf-scroll-bg's scrollTop
    */
   function scroll (relative, event, disY) {
+    var len
     var newEvent = event || window.event
-    var len = newEvent.clientY - disY
-    if (len < 0) {
-      len = 0;
+    var initTop = relative.self.offsetTop
+    if (position.isFirst) {
+      position.cTop > 0 ? position.isSpecial = true : position.isSpecial = false
+    }
+    var diff = newEvent.clientY - position.oldClientY
+    
+    var bodyHeight = relative.body.offsetHeight
+    var selfHeight = relative.self.offsetHeight
+    var contentHeight = relative.content.offsetHeight
+
+    if (position.isSpecial) {
+      console.log('special')
+      if (diff > 0) {
+        console.log('down')
+        len = newEvent.clientY - disY
+        len = check(len, relative)
+        position.cTop += len
+        position.oTop -= len * (bodyHeight / selfHeight)
+      } else {
+        console.log('up')
+        len = disY - newEvent.clientY
+        len = check(len, relative)
+        position.cTop -= len
+        position.oTop += len * (bodyHeight / selfHeight)
+      }
+    } else {
+      console.log('normal')
+      len = newEvent.clientY - disY
+      len = checkBoundary(len, relative)
+      position.cTop = len
+      position.oTop = -len * (bodyHeight / selfHeight)
+    }
+    position.oldClientY = newEvent.clientY
+    relative.content.style.top = position.cTop + 'px'
+    relative.body.style.top = position.oTop + 'px'
+    position.isFirst = false
+  }
+
+  function check (len, relative) {
+    if (len >= position.cTop) {
+      len = position.cTop
+    } else if (len >= relative.bg.offsetHeight - relative.content.offsetHeight - position.cTop) {
+      len = relative.bg.offsetHeight - relative.content.offsetHeight - position.cTop
+    }
+    return len
+  }
+
+  // check is to reach the boundary
+  function checkBoundary (len, relative) {
+    if (len <= 0) {
+      len = 0
     } else if (len > relative.bg.offsetHeight - relative.content.offsetHeight) {
       len = relative.bg.offsetHeight - relative.content.offsetHeight
     }
-    relative.content.style.top = position.cTop + len + 'px'
-    relative.body.style.top = position.oTop - len * (relative.body.offsetHeight / relative.self.offsetHeight) + 'px'
-    position.cTop = len
-    position.oTop = -len * (relative.body.offsetHeight / relative.self.offsetHeight)
+    return len
   }
 
   /*
@@ -206,10 +260,17 @@
    * the series of mouse events on scroll object 
    */
   var operate = {
+    click: function (event, obj) {
+      var newEvent = event || window.event
+      var relative = getRelativeEle(obj)
+      // var disY = newEvent.clientY - document.body.scrollTop
+      // console.log(disY)
+    },
     down: function (obj, event) {
       var event = event || window.event
       var relative = getRelativeEle(obj)
       var disY = event.clientY - relative.bg.scrollTop
+      position.isFirst = true
       document.onmousemove = function (ev) {
         operate.move(ev, relative, disY)
       }
@@ -245,6 +306,10 @@
         })
       }
     }
+  }
+
+  function getPosition () {
+    console.log(position)
   }
 
   // init the sjf-scroll

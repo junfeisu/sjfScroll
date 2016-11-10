@@ -5,6 +5,7 @@
 }
 
 .sjf-scroll-body {
+  z-index: 1;
   width: 100%;
   position: absolute;
   top: 0px;
@@ -12,6 +13,7 @@
 }
 
 .sjf-scroll-bg {
+  z-index: 9999;
   position: absolute;
   width: 10px;
   right: 0px;
