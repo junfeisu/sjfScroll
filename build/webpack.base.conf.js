@@ -12,9 +12,7 @@ var useCssSourceMap = cssSourceMapDev || cssSourceMapProd
 
 module.exports = {
   entry: {
-    'event-source-polyfill',
-    'webpack-hot-middleware/client',
-    './src/main.js'
+    app: './src/main.js'
   },
   output: {
     path: config.build.assetsRoot,
