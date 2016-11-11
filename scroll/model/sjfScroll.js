@@ -19,9 +19,7 @@
   var position = {
     cTop: 0,
     oTop: 0,
-    isFirst: true,
-    oldClientY: 0,
-    isSpecial: false
+    oldClientY: 0
   }
 
   // Determine whether as an object
@@ -165,30 +163,27 @@
     var len
     var newEvent = event || window.event
     var initTop = relative.self.offsetTop
-    if (position.isFirst){
-     position.cTop > 0 ? position.isSpecial = true : position.isSpecial = false
-    }
-    
+
     var bodyHeight = relative.body.offsetHeight
     var selfHeight = relative.self.offsetHeight
     var contentHeight = relative.content.offsetHeight
+
     len = newEvent.clientY - position.oldClientY
     len = checkBoundary(len, relative)
+
     position.cTop += len
     position.oTop -= len * (bodyHeight / selfHeight)
     relative.content.style.top = position.cTop + 'px'
     relative.body.style.top = position.oTop + 'px'
-    position.isFirst = false
+
     position.oldClientY = newEvent.clientY
   }
 
   // check is to reach the boundary
   function checkBoundary (len, relative) {
     if (len <= -position.cTop) {
-      console.log('over min')
       len = -position.cTop
     } else if (len >= relative.bg.offsetHeight - relative.content.offsetHeight - position.cTop) {
-      console.log('over max')
       len = relative.bg.offsetHeight - relative.content.offsetHeight - position.cTop
     }
     return len
@@ -197,17 +192,19 @@
   /*
    * This is to deal the wheel event
    */
-  function changeLocation (relative, event) {
+  function changeLocation (relative, event, isFirefox) {
     var newEvent = event || window.event
     newEvent.stopPropagation ? newEvent.stopPropagation() : newEvent.cancelBubble = true
     newEvent.preventDefault ? newEvent.preventDefault() : newEvent.returnValue = false
 
-    var direction = newEvent.detail || newEvent.wheelDelta
     var bgHeight = relative.bg.offsetHeight
     var bodyHeight = relative.body.offsetHeight
     var contentHeight = relative.content.offsetHeight
     var selfHeight = relative.self.offsetHeight
+    var direction =  isFirefox ? -newEvent.detail : newEvent.wheelDelta
+    console.log(direction)
     var distance = bgHeight - contentHeight - options.gradient
+
     if (direction <= 0) {
       if (position.cTop >= distance) {
         position.cTop = bgHeight - contentHeight
@@ -273,11 +270,11 @@
       var navigator = navigator || window.navigator
       if (navigator.userAgent.toLowerCase().indexOf('firefox') < 0) {
         relative.self.onmousewheel = function (ev) {
-          changeLocation(relative, ev)
+          changeLocation(relative, ev, false)
         }
       } else {
         obj.addEventListener('DOMMouseScroll', function (ev) {
-          changeLocation(relative, ev)
+          changeLocation(relative, ev, true)
         })
       }
     }
