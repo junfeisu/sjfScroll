@@ -16,10 +16,6 @@
     gradient: 10
   }
 
-  var paramsList = {
-    scrollTo: '{spot, relative}'
-  }
-
   /*
    * This is the param for sjf-scroll postion 
    * @param cTop is the top of sjf-scroll-content
@@ -30,10 +26,6 @@
     cTop: 0,
     oTop: 0,
     oldClientY: 0
-  }
-
-  function getPosition () {
-    console.log(position)
   }
 
   // init the sjf-scroll
@@ -56,6 +48,15 @@
       bg: obj.querySelector('.sjf-scroll-bg'),
       content: obj.querySelector('.sjf-scroll-content'),
       self: obj
+    }
+  }
+
+  function getRelativeHeight (obj) {
+    return {
+      bodyHeight: obj.querySelector('.sjf-scroll-body').offsetHeight,
+      bgHeight: obj.querySelector('.sjf-scroll-bg').offsetHeight,
+      contentHeight: obj.querySelector('.sjf-scroll-content').offsetHeight,
+      selfHeight: obj.offsetHeight
     }
   }
 
@@ -170,7 +171,7 @@
     }
 
     bg.onclick = function (event) {
-      operate.click(event, obj)
+      operate.click(obj, event)
     }
 
     content.onclick = function (event) {
@@ -193,60 +194,61 @@
     var newEvent = event || window.event
     var initTop = relative.self.offsetTop
 
-    var bodyHeight = relative.body.offsetHeight
-    var selfHeight = relative.self.offsetHeight
-    var contentHeight = relative.content.offsetHeight
+    var heightList = getRelativeHeight(relative.self)
 
     len = newEvent.clientY - position.oldClientY
-    len = checkBoundary(len, relative)
+    len = moveBoundary(len, relative)
 
     position.cTop += len
-    position.oTop -= len * (bodyHeight / selfHeight)
+    position.oTop -= len * (heightList.bodyHeight / heightList.selfHeight)
     relative.content.style.top = position.cTop + 'px'
     relative.body.style.top = position.oTop + 'px'
 
     position.oldClientY = newEvent.clientY
   }
 
+  // check is to reach the boundary
+  function moveBoundary (len, relative) {
+    var heightList = getRelativeHeight(relative.self)
+    if (len <= -position.cTop) {
+      len = -position.cTop
+    } else if (len >= heightList.bgHeight - heightList.contentHeight - position.cTop) {
+      len = heightList.bgHeight - heightList.contentHeight - position.cTop
+    }
+    return len
+  }
+
   // direct change to the designated spot
   function scrollTo (param) {
     typeof param === 'undefined' ? 
-      console.error('the sjfScroll.scrollTo needs a param' + paramsList.scrollTo) : 
-      !param.hasOwnProperty('spot') ? 
-        console.error('param has a attribtue[spot] to set the designated spot') :
-        !param.hasOwnProperty('relativeDom') ? 
-        console.error('param has a attribte[relativeDom] to set the relative dom element') :
+      console.error('the sjfScroll.scrollTo needs a param {spot: , relativeDom}') : 
+      !param.hasOwnProperty('spot') || !param.hasOwnProperty('relativeDom') ? 
+        console.error('param has a attribtue[spot] to set the designated spot' +
+         'param has a attribte[relativeDom]  to set the relative dom element') :
         (function () {
-          var bgHeight = param.relativeDom.bg.offsetHeight
-          var contentHeight = param.relativeDom.content.offsetHeight
-          var bodyHeight = param.relativeDom.body.offsetHeight
-          var selfHeight = param.relativeDom.self.offsetHeight
-
           var distance = param.spot - param.relativeDom.self.offsetTop
-          if (distance >= contentHeight / 2 && distance <= bgHeight - contentHeight / 2) {
-            position.cTop = distance - contentHeight / 2
-            position.oTop = -(contentHeight / 2 + distance) * (bodyHeight / selfHeight)
-          } else if (distance < contentHeight / 2) {
-            position.cTop = 0
-            position.oTop = 0
-          } else if (distance > bgHeight - contentHeight / 2) {
-            position.cTop = bgHeight - contentHeight
-            position.oTop = -(bodyHeight - selfHeight)
-          }
-
+          var heightList = getRelativeHeight(param.relativeDom.self)
+          clickBoundary(distance, heightList)
           param.relativeDom.body.style.top = position.oTop + 'px'
           param.relativeDom.content.style.top = position.cTop + 'px'
         })()
   }
 
-  // check is to reach the boundary
-  function checkBoundary (len, relative) {
-    if (len <= -position.cTop) {
-      len = -position.cTop
-    } else if (len >= relative.bg.offsetHeight - relative.content.offsetHeight - position.cTop) {
-      len = relative.bg.offsetHeight - relative.content.offsetHeight - position.cTop
+  function clickBoundary (distance, list) {
+    var maxCTop = list.bgHeight - list.contentHeight
+    var maxOTop = list.bodyHeight - list.selfHeight
+    var upperBoundary = list.bgHeight - list.contentHeight / 2
+    if (distance >= list.contentHeight / 2 && distance <= upperBoundary) {
+      position.cTop = distance - list.contentHeight / 2
+      position.oTop = -(list.contentHeight / 2 + distance) * 
+        (list.bodyHeight / list.selfHeight)
+    } else if (distance < list.contentHeight / 2) {
+      position.cTop = 0
+      position.oTop = 0
+    } else if (distance > upperBoundary) {
+      position.cTop = maxCTop
+      position.oTop = -maxOTop
     }
-    return len
   }
 
   /*
@@ -259,20 +261,17 @@
     newEvent.stopPropagation ? newEvent.stopPropagation() : newEvent.cancelBubble = true
     newEvent.preventDefault ? newEvent.preventDefault() : newEvent.returnValue = false
 
-    var bgHeight = relative.bg.offsetHeight
-    var bodyHeight = relative.body.offsetHeight
-    var contentHeight = relative.content.offsetHeight
-    var selfHeight = relative.self.offsetHeight
+    var heightList = getRelativeHeight(relative.self)
     
     var direction = isFirefox ? -newEvent.detail : newEvent.wheelDelta
-    var distance = bgHeight - contentHeight - options.gradient
+    var distance = heightList.bgHeight - heightList.contentHeight - options.gradient
 
     if (direction <= 0) {
       if (position.cTop >= distance) {
-        position.cTop = bgHeight - contentHeight
-        position.oTop = -(bodyHeight - selfHeight)
+        position.cTop = heightList.bgHeight - heightList.contentHeight
+        position.oTop = -(heightList.bodyHeight - heightList.selfHeight)
       } else {
-        position.oTop -= options.gradient * (bodyHeight / selfHeight)
+        position.oTop -= options.gradient * (heightList.bodyHeight / heightList.selfHeight)
         position.cTop += options.gradient
       }
     } else {
@@ -280,7 +279,7 @@
         position.cTop = 0
         position.oTop = 0
       } else {
-        position.oTop += options.gradient * (bodyHeight / selfHeight)
+        position.oTop += options.gradient * (heightList.bodyHeight / heightList.selfHeight)
         position.cTop -= options.gradient
       }
     }
@@ -292,10 +291,10 @@
    * the series of mouse events on scroll object 
    */
   var operate = {
-    click: function (event, obj) {
+    click: function (obj, event) {
       var newEvent = event || window.event
       var relative = getRelativeEle(obj)
-      var disY = newEvent.clientY - document.body.scrollTop
+      var disY = newEvent.clientY + document.body.scrollTop
       scrollTo({spot: disY, relativeDom: relative})
     },
     down: function (obj, event) {
@@ -330,10 +329,8 @@
     wheel: function (obj, event) {
       var newEvent = event || window.event
       var relative = getRelativeEle(obj)
-      var disY = newEvent.clientY - relative.bg.scrollTop
-      var navigator = navigator || window.navigator
       if (navigator.userAgent.toLowerCase().indexOf('firefox') < 0) {
-        relative.self.onmousewheel = function (ev) {
+        obj.onmousewheel = function (ev) {
           changeLocation(relative, ev, false)
         }
       } else {

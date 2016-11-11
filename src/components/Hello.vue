@@ -17,7 +17,6 @@ export default {
   },
   mounted () {
     sjfScroll.initScroll()
-    sjfScroll.scrollTo()
   }
 }
 </script>
@@ -32,5 +31,6 @@ export default {
 
   .sjf-scroll {
     width: 50%;
+    // margin-top: 400px;
   }
 </style>
