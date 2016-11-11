@@ -16,11 +16,28 @@
     gradient: 10
   }
 
+  /*
+   * This is the param for sjf-scroll postion 
+   * @param cTop is the top of sjf-scroll-content
+   * @param oTop is the top of sjf-scroll-body
+   * @param oldClientY is the old position of sjf-scroll move event
+   */
   var position = {
     cTop: 0,
     oTop: 0,
     oldClientY: 0
   }
+
+  function getPosition () {
+    console.log(position)
+  }
+
+  // init the sjf-scroll
+  function initScroll () {
+    watchOptions(options)
+    getMaxHeight()
+  }
+
 
   // Determine whether as an object
   function isObject (obj) {
@@ -49,55 +66,6 @@
       last = setTimeout(function(){
           action.apply(ctx, args)
       }, options.delay)
-    }
-  }
-
-  // get the living example entrance of sjf-scroll
-  function getMaxHeight () {
-    var scrolls = document.querySelectorAll('.sjf-scroll')
-    Array.prototype.forEach.call(scrolls, value => {
-      var maxHeight = value.getAttribute('max-height')
-      if (maxHeight === null) {
-        console.error('sjf-scroll: [error]' + 
-          'please add a attribute["max-height": value&int] on ".sjf-scroll"' + 
-          '&& max-height >= 100')
-      } else {
-        +maxHeight < 100 ? 
-          console.warn('sjf-scroll: [warn] the value of max-height should be above or equal 100') : 
-          rewriteDom(value, maxHeight)
-      }
-    })
-  }
-
-  /*
-   * rewrite the DOM structure of sjf-scroll
-   */
-  function rewriteDom (obj, maxHeight) {
-    var initHtml = obj.innerHTML
-    initHtml = '<div class="sjf-scroll-wrapper"><div class="sjf-scroll-body">' + initHtml + 
-      '</div><div class="sjf-scroll-bg"><span class="sjf-scroll-content"></span></div>'
-    obj.innerHTML = initHtml
-    
-    var wrapper = obj.querySelector('.sjf-scroll-wrapper')
-    var bg = obj.querySelector('.sjf-scroll-bg')
-    var content = obj.querySelector('.sjf-scroll-content')
-    var body = obj.querySelector('.sjf-scroll-body')
-    var offsetHeight = body.offsetHeight || body.clientHeight
-
-    offsetHeight > maxHeight ? bg.style.display = 'block' : bg.style.display = 'none'
-    wrapper.style.height = maxHeight + 'px'
-    bg.style.height = maxHeight + 'px'
-    content.style.height = (maxHeight * maxHeight) / offsetHeight + 'px'
-    wrapper.onmouseover = function (event) {
-      operate.over(wrapper, event)
-    }
-
-    bg.onclick = function (event) {
-      operate.click(event, obj)
-    }
-
-    content.onmousedown = function (event) {
-      operate.down(obj, event)
     }
   }
 
@@ -153,11 +121,59 @@
     }
   }
 
+  // get the living example entrance of sjf-scroll
+  function getMaxHeight () {
+    var scrolls = document.querySelectorAll('.sjf-scroll')
+    Array.prototype.forEach.call(scrolls, value => {
+      var maxHeight = value.getAttribute('max-height')
+      if (maxHeight === null) {
+        console.error('sjf-scroll: [error]' + 
+          'please add a attribute["max-height": value&int] on ".sjf-scroll"' + 
+          '&& max-height >= 100')
+      } else {
+        +maxHeight < 100 ? 
+          console.warn('sjf-scroll: [warn] the value of max-height should be above or equal 100') : 
+          rewriteDom(value, maxHeight)
+      }
+    })
+  }
+
+  /*
+   * rewrite the DOM structure of sjf-scroll
+   */
+  function rewriteDom (obj, maxHeight) {
+    var initHtml = obj.innerHTML
+    initHtml = '<div class="sjf-scroll-wrapper"><div class="sjf-scroll-body">' + initHtml + 
+      '</div><div class="sjf-scroll-bg"><span class="sjf-scroll-content"></span></div>'
+    obj.innerHTML = initHtml
+    
+    var wrapper = obj.querySelector('.sjf-scroll-wrapper')
+    var bg = obj.querySelector('.sjf-scroll-bg')
+    var content = obj.querySelector('.sjf-scroll-content')
+    var body = obj.querySelector('.sjf-scroll-body')
+    var offsetHeight = body.offsetHeight || body.clientHeight
+
+    offsetHeight > maxHeight ? bg.style.display = 'block' : bg.style.display = 'none'
+    wrapper.style.height = maxHeight + 'px'
+    bg.style.height = maxHeight + 'px'
+    content.style.height = (maxHeight * maxHeight) / offsetHeight + 'px'
+    wrapper.onmouseover = function (event) {
+      operate.over(wrapper, event)
+    }
+
+    bg.onclick = function (event) {
+      console.log('click')
+      operate.click(event, obj)
+    }
+
+    content.onmousedown = function (event) {
+      operate.down(obj, event)
+    }
+  }
+
   /*
    * This is to deal the scroll move 
    * @param relative is a object of the assembly of element which is relatived to the scroll event
-   * @param disY is the distance of the vertical direction between mouse and 
-      .sjf-scroll-bg's scrollTop
    */
   function scroll (relative, event) {
     var len
@@ -177,6 +193,30 @@
     relative.body.style.top = position.oTop + 'px'
 
     position.oldClientY = newEvent.clientY
+  }
+
+  function scrollTo (disY, relative) {
+    console.log('scrollTo')
+    var bgHeight = relative.bg.offsetHeight
+    var contentHeight = relative.content.offsetHeight
+    var bodyHeight = relative.body.offsetHeight
+    var selfHeight = relative.self.offsetHeight
+
+    var distance = disY - relative.self.offsetTop
+    console.log(distance)
+    if (distance >= contentHeight / 2 && distance <= bgHeight - contentHeight / 2) {
+      position.cTop = distance - contentHeight / 2
+      position.oTop = -(contentHeight / 2 + distance) * (bodyHeight / selfHeight)
+    } else if (distance < contentHeight / 2) {
+      position.cTop = 0
+      position.oTop = 0
+    } else if (distance > bgHeight - contentHeight / 2) {
+      position.cTop = bgHeight - contentHeight
+      position.oTop = -(bodyHeight - selfHeight)
+    }
+
+    relative.body.style.top = position.oTop + 'px'
+    relative.content.style.top = position.cTop + 'px'
   }
 
   // check is to reach the boundary
@@ -201,8 +241,8 @@
     var bodyHeight = relative.body.offsetHeight
     var contentHeight = relative.content.offsetHeight
     var selfHeight = relative.self.offsetHeight
-    var direction =  isFirefox ? -newEvent.detail : newEvent.wheelDelta
-    console.log(direction)
+    
+    var direction = isFirefox ? -newEvent.detail : newEvent.wheelDelta
     var distance = bgHeight - contentHeight - options.gradient
 
     if (direction <= 0) {
@@ -233,25 +273,23 @@
     click: function (event, obj) {
       var newEvent = event || window.event
       var relative = getRelativeEle(obj)
-      // var disY = newEvent.clientY - document.body.scrollTop
-      // console.log(disY)
+      var disY = newEvent.clientY - document.body.scrollTop
+      scrollTo(disY, relative)
     },
     down: function (obj, event) {
       var event = event || window.event
       var relative = getRelativeEle(obj)
       var disY = event.clientY - relative.bg.scrollTop
-      position.isSpecial = false
-      position.isFirst = true
       position.oldClientY = disY
       document.onmousemove = function (ev) {
-        operate.move(ev, relative)
+        operate.move(relative, ev)
       }
       document.onmouseup = function () {
         operate.up()
       }
     },
-    move: function (event, relative, disY) {
-      scroll(relative, event, disY)
+    move: function (obj, event) {
+      scroll(obj, event)
     },
     over: function (obj, event) {
       var newEvent = event || window.event
@@ -278,16 +316,6 @@
         })
       }
     }
-  }
-
-  function getPosition () {
-    console.log(position)
-  }
-
-  // init the sjf-scroll
-  function initScroll () {
-    watchOptions(options)
-    getMaxHeight()
   }
 
   return {
