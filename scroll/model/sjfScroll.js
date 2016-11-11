@@ -190,14 +190,11 @@
    * @param relative is a object of the assembly of element which is relatived to the scroll event
    */
   function scroll (relative, event) {
-    var len
     var newEvent = event || window.event
-    var initTop = relative.self.offsetTop
-
     var heightList = getRelativeHeight(relative.self)
+    var len = newEvent.clientY - position.oldClientY
 
-    len = newEvent.clientY - position.oldClientY
-    len = moveBoundary(len, relative)
+    len = moveBoundary(len, heightList)
 
     position.cTop += len
     position.oTop -= len * (heightList.bodyHeight / heightList.selfHeight)
@@ -208,12 +205,11 @@
   }
 
   // check is to reach the boundary
-  function moveBoundary (len, relative) {
-    var heightList = getRelativeHeight(relative.self)
+  function moveBoundary (len, list) {
     if (len <= -position.cTop) {
       len = -position.cTop
-    } else if (len >= heightList.bgHeight - heightList.contentHeight - position.cTop) {
-      len = heightList.bgHeight - heightList.contentHeight - position.cTop
+    } else if (len >= list.bgHeight - list.contentHeight - position.cTop) {
+      len = list.bgHeight - list.contentHeight - position.cTop
     }
     return len
   }
@@ -224,7 +220,7 @@
       console.error('the sjfScroll.scrollTo needs a param {spot: , relativeDom}') : 
       !param.hasOwnProperty('spot') || !param.hasOwnProperty('relativeDom') ? 
         console.error('param has a attribtue[spot] to set the designated spot' +
-         'param has a attribte[relativeDom]  to set the relative dom element') :
+         'param has a attribte[relativeDom] to set the relative dom element') :
         (function () {
           var distance = param.spot - param.relativeDom.self.offsetTop
           var heightList = getRelativeHeight(param.relativeDom.self)
@@ -256,35 +252,65 @@
    * @param relative is the relative dom element
    * @isFirefox is to judge is the browser is firefox
    */
-  function changeLocation (relative, event, isFirefox) {
+  function changeLocation (relative, event, condition) {
     var newEvent = event || window.event
     newEvent.stopPropagation ? newEvent.stopPropagation() : newEvent.cancelBubble = true
     newEvent.preventDefault ? newEvent.preventDefault() : newEvent.returnValue = false
 
     var heightList = getRelativeHeight(relative.self)
-    
-    var direction = isFirefox ? -newEvent.detail : newEvent.wheelDelta
-    var distance = heightList.bgHeight - heightList.contentHeight - options.gradient
-
-    if (direction <= 0) {
-      if (position.cTop >= distance) {
-        position.cTop = heightList.bgHeight - heightList.contentHeight
-        position.oTop = -(heightList.bodyHeight - heightList.selfHeight)
-      } else {
-        position.oTop -= options.gradient * (heightList.bodyHeight / heightList.selfHeight)
-        position.cTop += options.gradient
-      }
+    var direction = false
+    if (typeof condition === 'boolean') {
+      var judge = condition ? -newEvent.detail : newEvent.wheelDelta
+      direction = judge <= 0 ? 'down' : 'up'
     } else {
-      if (position.cTop <= options.gradient) {
-        position.cTop = 0
-        position.oTop = 0
-      } else {
-        position.oTop += options.gradient * (heightList.bodyHeight / heightList.selfHeight)
-        position.cTop -= options.gradient
+      direction = condition === 38 ? 'up' : 'down'
+    }
+
+    var distance = heightList.bgHeight - heightList.contentHeight - options.gradient
+    var unit = options.gradient * (heightList.bodyHeight / heightList.selfHeight)
+
+    var directionValue = {
+      down: {
+        cGradient: options.gradient,
+        oGradient: -unit,
+        boundaryCondition: distance,
+        cBoundary: heightList.bgHeight - heightList.contentHeight,
+        oBoundary: -(heightList.bodyHeight - heightList.selfHeight)
+      },
+      up: {
+        cGradient: -options.gradient,
+        oGradient: unit,
+        boundaryCondition: options.gradient,
+        cBoundary: 0,
+        oBoundary: 0
       }
     }
+
+    if (!checkBoundary(direction, directionValue)) {
+      position.oTop += directionValue[direction].oGradient
+      position.cTop += directionValue[direction].cGradient
+    }
+
     relative.body.style.top = position.oTop + 'px'
     relative.content.style.top = position.cTop + 'px'
+  }
+
+  function checkBoundary (direction, value) {
+    var result = false
+    if (direction === 'down') {
+      if (position.cTop >= value['down'].boundaryCondition) {
+        position.cTop = value['down'].cBoundary
+        position.oTop = value['down'].oBoundary
+        result = true
+      }
+    } else {
+      if (position.cTop <= value['up'].boundaryCondition) {
+        position.cTop = value['up'].cBoundary
+        position.oTop = value['up'].oBoundary
+        result = true
+      }
+    }
+    return result
   }
 
   /*
@@ -315,10 +341,9 @@
     keydown: function (obj) {
       document.onkeydown = function (event) {
         var newEvent = window.event || event
-        if (newEvent.keyCode === 38) {
-          console.log('up')
-        } else if (newEvent.keyCode === 40) {
-          console.log('down')
+        var relative = getRelativeEle(obj)
+        if (newEvent.keyCode === 38 || newEvent.keyCode === 40) {
+          changeLocation(relative, newEvent, newEvent.keyCode)
         }
       }
     },
