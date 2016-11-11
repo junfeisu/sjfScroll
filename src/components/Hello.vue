@@ -17,6 +17,7 @@ export default {
   },
   mounted () {
     sjfScroll.initScroll()
+    sjfScroll.scrollTo()
   }
 }
 </script>

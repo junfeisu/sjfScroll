@@ -16,6 +16,10 @@
     gradient: 10
   }
 
+  var paramsList = {
+    scrollTo: '{spot, relative}'
+  }
+
   /*
    * This is the param for sjf-scroll postion 
    * @param cTop is the top of sjf-scroll-content
@@ -158,12 +162,21 @@
     bg.style.height = maxHeight + 'px'
     content.style.height = (maxHeight * maxHeight) / offsetHeight + 'px'
     wrapper.onmouseover = function (event) {
-      operate.over(wrapper, event)
+      var newEvent = event || window.event
+      debounce(function () {
+        operate.wheel(obj, newEvent)
+        operate.keydown(obj, newEvent)
+      })()
     }
 
     bg.onclick = function (event) {
-      console.log('click')
       operate.click(event, obj)
+    }
+
+    content.onclick = function (event) {
+      var newEvent = event || window.event
+      newEvent.stopPropagation ? newEvent.stopPropagation() : window.cancelBubble = false
+      return false
     }
 
     content.onmousedown = function (event) {
@@ -195,28 +208,35 @@
     position.oldClientY = newEvent.clientY
   }
 
-  function scrollTo (disY, relative) {
-    console.log('scrollTo')
-    var bgHeight = relative.bg.offsetHeight
-    var contentHeight = relative.content.offsetHeight
-    var bodyHeight = relative.body.offsetHeight
-    var selfHeight = relative.self.offsetHeight
+  // direct change to the designated spot
+  function scrollTo (param) {
+    typeof param === 'undefined' ? 
+      console.error('the sjfScroll.scrollTo needs a param' + paramsList.scrollTo) : 
+      !param.hasOwnProperty('spot') ? 
+        console.error('param has a attribtue[spot] to set the designated spot') :
+        !param.hasOwnProperty('relativeDom') ? 
+        console.error('param has a attribte[relativeDom] to set the relative dom element') :
+        (function () {
+          var bgHeight = param.relativeDom.bg.offsetHeight
+          var contentHeight = param.relativeDom.content.offsetHeight
+          var bodyHeight = param.relativeDom.body.offsetHeight
+          var selfHeight = param.relativeDom.self.offsetHeight
 
-    var distance = disY - relative.self.offsetTop
-    console.log(distance)
-    if (distance >= contentHeight / 2 && distance <= bgHeight - contentHeight / 2) {
-      position.cTop = distance - contentHeight / 2
-      position.oTop = -(contentHeight / 2 + distance) * (bodyHeight / selfHeight)
-    } else if (distance < contentHeight / 2) {
-      position.cTop = 0
-      position.oTop = 0
-    } else if (distance > bgHeight - contentHeight / 2) {
-      position.cTop = bgHeight - contentHeight
-      position.oTop = -(bodyHeight - selfHeight)
-    }
+          var distance = param.spot - param.relativeDom.self.offsetTop
+          if (distance >= contentHeight / 2 && distance <= bgHeight - contentHeight / 2) {
+            position.cTop = distance - contentHeight / 2
+            position.oTop = -(contentHeight / 2 + distance) * (bodyHeight / selfHeight)
+          } else if (distance < contentHeight / 2) {
+            position.cTop = 0
+            position.oTop = 0
+          } else if (distance > bgHeight - contentHeight / 2) {
+            position.cTop = bgHeight - contentHeight
+            position.oTop = -(bodyHeight - selfHeight)
+          }
 
-    relative.body.style.top = position.oTop + 'px'
-    relative.content.style.top = position.cTop + 'px'
+          param.relativeDom.body.style.top = position.oTop + 'px'
+          param.relativeDom.content.style.top = position.cTop + 'px'
+        })()
   }
 
   // check is to reach the boundary
@@ -231,6 +251,8 @@
 
   /*
    * This is to deal the wheel event
+   * @param relative is the relative dom element
+   * @isFirefox is to judge is the browser is firefox
    */
   function changeLocation (relative, event, isFirefox) {
     var newEvent = event || window.event
@@ -274,7 +296,7 @@
       var newEvent = event || window.event
       var relative = getRelativeEle(obj)
       var disY = newEvent.clientY - document.body.scrollTop
-      scrollTo(disY, relative)
+      scrollTo({spot: disY, relativeDom: relative})
     },
     down: function (obj, event) {
       var event = event || window.event
@@ -291,11 +313,15 @@
     move: function (obj, event) {
       scroll(obj, event)
     },
-    over: function (obj, event) {
-      var newEvent = event || window.event
-      debounce(function () {
-        operate.wheel(obj, newEvent)
-      })()
+    keydown: function (obj) {
+      document.onkeydown = function (event) {
+        var newEvent = window.event || event
+        if (newEvent.keyCode === 38) {
+          console.log('up')
+        } else if (newEvent.keyCode === 40) {
+          console.log('down')
+        }
+      }
     },
     up: function () {
       document.onmousemove = null
@@ -320,6 +346,7 @@
 
   return {
     initScroll: initScroll,
-    setOptions: setOptions
+    setOptions: setOptions,
+    scrollTo: scrollTo
   }
 })
