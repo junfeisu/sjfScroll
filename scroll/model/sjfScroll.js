@@ -80,8 +80,8 @@
   }
   
   function observe (obj) {
-    Object.keys(obj).forEach((key, index) => {
-      let val = obj[key]
+    Object.keys(obj).forEach(function(key, index) {
+      var val = obj[key]
       Object.defineProperty(obj, key, {
         get: function () {
           return val
