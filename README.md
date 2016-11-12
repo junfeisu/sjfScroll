@@ -54,6 +54,10 @@ The sjf-scroll supports options for users to set
   * The option `gradient` is to set the change unit of wheel or keydown events
     (滚一下滚动10px或者上翻10px)
 
+  * the user to set the options API is sjfScroll.setOptions(param)
+  
+    the param is a object which contains one attribute or more of options
+
 And now you can use sjf-scroll in your project easily
 
 For detailed explanation on how things work, checkout the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
