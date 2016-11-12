@@ -8,8 +8,8 @@
   'use strict'
   /*
    * This is the options for sjf-scroll
-   * @param isShow is for showing the sjf-scroll
-   * @param delay is the time to deal the mouse events on the scroll-container
+   * @param delay is the time to deal the mouse events on the scroll-wrapper
+   * @param gradient is the The unit of progress for wheel or keydown events
    */
   var options = {
     delay: 1000,
@@ -17,23 +17,14 @@
   }
 
   
-  //  * This is the param for sjf-scroll postion 
-  //  * @param cTop is the top of sjf-scroll-content
-  //  * @param oTop is the top of sjf-scroll-body
-  //  * @param oldClientY is the old position of sjf-scroll move event
-   
-  // var currentPosition = {
-  //   cTop: 0,
-  //   oTop: 0,
-  //   oldClientY: 0
-  // }
+  
+  /*
+   * This is the param for sjf-scroll postion 
+   * @param cTop is the top of sjf-scroll-content
+   * @param oTop is the top of sjf-scroll-body
+   * @param oldClientY is the old position of sjf-scroll move event
+   */
   var currentPosition = {}
-  // init the sjf-scroll
-  function initScroll () {
-    watchOptions(options)
-    getMaxHeight()
-  }
-
 
   // Determine whether as an object
   function isObject (obj) {
@@ -42,6 +33,7 @@
     return result
   }
 
+  // To get the dom for The corresponding event
   function getRelativeEle (obj) {
     return {
       body: obj.querySelector('.sjf-scroll-body'),
@@ -51,6 +43,7 @@
     }
   }
 
+  // to get the height of the Specific dom
   function getRelativeHeight (obj) {
     return {
       bodyHeight: obj.querySelector('.sjf-scroll-body').offsetHeight,
@@ -97,6 +90,7 @@
           dealOptions(newValue)
         }).bind(this)
       }) 
+      // For depth monitoring on object properties
       if (Object.prototype.toString.call(obj[key]) === '[object Object]') {
         observe(obj[key])
       }
@@ -117,30 +111,28 @@
         JSON.stringify(option) + ' is not a object')
       return
     }
-    for (let prop in option) {
-      if (options.hasOwnProperty(prop)) {
-        options[prop] = option[prop]
-      } else {
-        console.warn('sjf-scroll:[warn] sjf-scroll has not support the configuration item of ' + prop)
-      }
+    for (var prop in option) {
+      options.hasOwnProperty(prop) ? options[prop] = option[prop] : 
+        console.warn('sjf-scroll:[warn] sjf-scroll do not support the configuration item of ' + prop)
     }
   }
 
   // get the living example entrance of sjf-scroll
   function getMaxHeight () {
-    var scrolls = document.querySelectorAll('.sjf-scroll')
-    Array.prototype.forEach.call(scrolls, value => {
-      var maxHeight = value.getAttribute('max-height')
-      if (maxHeight === null) {
-        console.error('sjf-scroll: [error]' + 
-          'please add a attribute["max-height": value&int] on ".sjf-scroll"' + 
-          '&& max-height >= 100')
-      } else {
-        +maxHeight < 100 ? 
-          console.warn('sjf-scroll: [warn] the value of max-height should be above or equal 100') : 
-          rewriteDom(value, maxHeight)
-      }
-    })
+    var scrolls = document.querySelectorAll('[sjf-scroll]')
+    if (scrolls.length !== 0) {
+      Array.prototype.forEach.call(scrolls, function(value) {
+        var maxHeight = value.getAttribute('max-height')
+        maxHeight !== null ? +maxHeight < 150 ? 
+            console.warn('sjf-scroll:[warn] the value of max-height best is >= 150') : 
+            '' :
+          maxHeight = 150
+        rewriteDom(value, maxHeight)
+      })
+    } else {
+      console.error('At least need a .sjf-scroll in your dom for example:' + 
+        '<div class="sjf-scroll"></div>')
+    }
   }
 
   /*
@@ -216,7 +208,7 @@
     currentPosition.oldClientY = newEvent.clientY
   }
 
-  // check is to reach the boundary
+  // check is to reach the boundary of drag event
   function moveBoundary (len, list) {
     if (len <= -currentPosition.cTop) {
       len = -currentPosition.cTop
@@ -242,6 +234,7 @@
         })()
   }
 
+  // check is to reach the boundary of click event
   function clickBoundary (distance, list) {
     var maxCTop = list.bgHeight - list.contentHeight
     var maxOTop = list.bodyHeight - list.selfHeight
@@ -262,7 +255,7 @@
   /*
    * This is to deal the wheel event
    * @param relative is the relative dom element
-   * @isFirefox is to judge is the browser is firefox
+   * @condition is to judge the direction
    */
   function changeLocation (relative, event, condition) {
     var newEvent = event || window.event
@@ -270,11 +263,16 @@
     newEvent.preventDefault ? newEvent.preventDefault() : newEvent.returnValue = false
 
     var heightList = getRelativeHeight(relative.self)
-    var direction = false
+
+    // to judge the direction 
+    // and made special treatment to wheel events of firefox direction
+    var direction = 'down'
     if (typeof condition === 'boolean') {
+      // this is the wheel event
       var judge = condition ? -newEvent.detail : newEvent.wheelDelta
       direction = judge <= 0 ? 'down' : 'up'
     } else {
+      // this is the keydown event
       direction = condition === 38 ? 'up' : 'down'
     }
 
@@ -298,6 +296,7 @@
       }
     }
 
+    // check is to reach the boundary of wheel event and keydown event
     if (!checkBoundary(direction, directionValue)) {
       currentPosition.oTop += directionValue[direction].oGradient
       currentPosition.cTop += directionValue[direction].cGradient
@@ -376,6 +375,12 @@
         })
       }
     }
+  }
+
+  // init the sjf-scroll
+  function initScroll () {
+    watchOptions(options)
+    getMaxHeight()
   }
 
   return {

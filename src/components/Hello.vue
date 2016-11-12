@@ -1,9 +1,9 @@
 <template>
   <div class="hello">
-    <div class="sjf-scroll" max-height="150">
+    <div sjf-scroll class="sjf-scroll">
       <p v-for="list in lists" v-text="list"></p>
     </div>
-    <div class="sjf-scroll" max-height="160">
+    <div sjf-scroll max-height="150" class="sjf-scroll">
       <p v-for="test in tests" v-text="test"></p>
     </div>
   </div>

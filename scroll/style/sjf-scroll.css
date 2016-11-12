@@ -10,6 +10,11 @@
   position: absolute;
   top: 0px;
   left: 0px;
+  transition: 0.5s;
+  -webkit-transition: 0.5s;
+  -moz-transition: 0.5s;
+  -ms-transition: 0.5s;
+  -o-transition: 0.5s;
 }
 
 .sjf-scroll-bg {
@@ -29,6 +34,11 @@
   background: #666;
   left: 0px;
   top: 0px;
+  transition: 0.5s;
+  -webkit-transition: 0.5s;
+  -moz-transition: 0.5s;
+  -ms-transition: 0.5s;
+  -o-transition: 0.5s;
 }
 
 .sjf-scroll-content:hover {
