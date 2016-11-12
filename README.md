@@ -1,6 +1,6 @@
 # sjf-scroll
 
-> A simple custom scroll framework. it is according to the browser's scroll bar to make. So it is support most browser's feature.For example, it support the mousewheel and drag and click etc events.
+> A simple custom scroll framework. It is made according to the browser's scroll bar. So it can support most browser's feature.For example, it supports the mousewheel, drag and click event etc.
 
 ## Build Setup
 
@@ -8,18 +8,18 @@
 # install dependencies
 npm install
 
-# serve with hot reload at localhost:8080 and you can through it to look the sjf-scroll example
+# serve with hot reload at localhost:8080 and you can through it to look the example of sjf-scroll
 npm run dev
 
 ```
 ## Usage 
 
-  1. import the sjf-scroll.css and sjfScroll.js into your project 
+  1. Import the sjf-scroll.css and sjfScroll.js into your project 
 
         <link rel="stylesheet" href="http://7xrp7o.com1.z0.glb.clouddn.com/sjf-scroll.css">
         <script src="http://7xrp7o.com1.z0.glb.clouddn.com/sjfScroll.js"></script>
 
-  2. add the script to init sjfScroll after dom onloaded
+  2. Add the script to initialize sjfScroll after dom onloaded
 
         window.onload = function () {
           sjfScroll.initScroll()
@@ -30,30 +30,30 @@ npm run dev
         import sjfScroll from 'http://7xrp7o.com1.z0.glb.clouddn.com/sjfScroll.js'
         sjfScroll.initScroll()
 
-  3. add the entrance for sjf-scroll.
+  3. Add the entrance of the sjf-scroll.
 
         <div sjf-scroll max-height="150"></div>
   
-    * The sjfScroll.js is to search the element with the attribute of 'sjf-scroll' and rewrite the dom to realize the feature
+    * The sjfScroll.js is to search the element with the attribute of 'sjf-scroll'. And rewriting the dom structure to realize the function
 
-    * The attribute `max-height` is to set beyond sjf-scroll range shows that the minimum value of the scroll bar.
+    * The attribute `max-height` is set to show the scroll bar when sjf-scroll content's height beyond it.
 
-    * And the default value is 150 and the value you set best to greater than or equal to 150
+    * The default value of attribute `max-height` is 150 and the value you set best to greater than or equal to 150
 
 ## options
-The sjf-scroll support a options for user to set
+The sjf-scroll supports options for users to set
     
     {
       delay: 1000, // default value
       gradient: 10 // default value
     }
 
-  * the option `delay` is to set the time suspended on the sjf-scroll before execution
+  * The option `delay` is to set the time the mouse is suspended in the sjf-scroll before executing other events
     (鼠标停留在sjf-scroll多久才会执行滚轮事件或者键盘事件)
 
-  * the option `gradient` is to set the unit of progress for wheel or keydown events
+  * The option `gradient` is to set the unit of progress for wheel or keydown events
     (滚一下滚动10px或者上翻10px)
 
-and now you can use sjf-scroll in your project easliy
+And now you can use sjf-scroll in your project easily
 
 For detailed explanation on how things work, checkout the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
