@@ -16,18 +16,18 @@
     gradient: 10
   }
 
-  /*
-   * This is the param for sjf-scroll postion 
-   * @param cTop is the top of sjf-scroll-content
-   * @param oTop is the top of sjf-scroll-body
-   * @param oldClientY is the old position of sjf-scroll move event
-   */
-  var position = {
-    cTop: 0,
-    oTop: 0,
-    oldClientY: 0
-  }
-
+  
+  //  * This is the param for sjf-scroll postion 
+  //  * @param cTop is the top of sjf-scroll-content
+  //  * @param oTop is the top of sjf-scroll-body
+  //  * @param oldClientY is the old position of sjf-scroll move event
+   
+  // var currentPosition = {
+  //   cTop: 0,
+  //   oTop: 0,
+  //   oldClientY: 0
+  // }
+  var currentPosition = {}
   // init the sjf-scroll
   function initScroll () {
     watchOptions(options)
@@ -162,12 +162,24 @@
     wrapper.style.height = maxHeight + 'px'
     bg.style.height = maxHeight + 'px'
     content.style.height = (maxHeight * maxHeight) / offsetHeight + 'px'
+
+    var isFirst = true
     wrapper.onmouseover = function (event) {
+      if (isFirst) {
+        var position = this.getAttribute('position')
+        position !== null ? currentPosition = JSON.parse(this.getAttribute('position')) :
+          currentPosition = {cTop: 0, oTop: 0, oldClientY: 0}
+        isFirst = false
+      }
       var newEvent = event || window.event
       debounce(function () {
         operate.wheel(obj, newEvent)
         operate.keydown(obj, newEvent)
       })()
+      this.onmouseleave = function () {
+        this.setAttribute('position', JSON.stringify(currentPosition))
+        isFirst = true
+      }
     }
 
     bg.onclick = function (event) {
@@ -192,24 +204,24 @@
   function scroll (relative, event) {
     var newEvent = event || window.event
     var heightList = getRelativeHeight(relative.self)
-    var len = newEvent.clientY - position.oldClientY
+    var len = newEvent.clientY - currentPosition.oldClientY
 
     len = moveBoundary(len, heightList)
 
-    position.cTop += len
-    position.oTop -= len * (heightList.bodyHeight / heightList.selfHeight)
-    relative.content.style.top = position.cTop + 'px'
-    relative.body.style.top = position.oTop + 'px'
+    currentPosition.cTop += len
+    currentPosition.oTop -= len * (heightList.bodyHeight / heightList.selfHeight)
+    relative.content.style.top = currentPosition.cTop + 'px'
+    relative.body.style.top = currentPosition.oTop + 'px'
 
-    position.oldClientY = newEvent.clientY
+    currentPosition.oldClientY = newEvent.clientY
   }
 
   // check is to reach the boundary
   function moveBoundary (len, list) {
-    if (len <= -position.cTop) {
-      len = -position.cTop
-    } else if (len >= list.bgHeight - list.contentHeight - position.cTop) {
-      len = list.bgHeight - list.contentHeight - position.cTop
+    if (len <= -currentPosition.cTop) {
+      len = -currentPosition.cTop
+    } else if (len >= list.bgHeight - list.contentHeight - currentPosition.cTop) {
+      len = list.bgHeight - list.contentHeight - currentPosition.cTop
     }
     return len
   }
@@ -225,8 +237,8 @@
           var distance = param.spot - param.relativeDom.self.offsetTop
           var heightList = getRelativeHeight(param.relativeDom.self)
           clickBoundary(distance, heightList)
-          param.relativeDom.body.style.top = position.oTop + 'px'
-          param.relativeDom.content.style.top = position.cTop + 'px'
+          param.relativeDom.body.style.top = currentPosition.oTop + 'px'
+          param.relativeDom.content.style.top = currentPosition.cTop + 'px'
         })()
   }
 
@@ -235,18 +247,15 @@
     var maxOTop = list.bodyHeight - list.selfHeight
     var upperBoundary = list.bgHeight - list.contentHeight / 2
     if (distance >= list.contentHeight / 2 && distance <= upperBoundary) {
-      console.log('123')
-      position.cTop = distance - list.contentHeight / 2
-      position.oTop = -(distance - list.contentHeight / 2) * 
+      currentPosition.cTop = distance - list.contentHeight / 2
+      currentPosition.oTop = -(distance - list.contentHeight / 2) * 
         (list.bodyHeight / list.selfHeight)
     } else if (distance < list.contentHeight / 2) {
-      console.log('234')
-      position.cTop = 0
-      position.oTop = 0
+      currentPosition.cTop = 0
+      currentPosition.oTop = 0
     } else if (distance > upperBoundary) {
-      console.log('345')
-      position.cTop = maxCTop
-      position.oTop = -maxOTop
+      currentPosition.cTop = maxCTop
+      currentPosition.oTop = -maxOTop
     }
   }
 
@@ -290,27 +299,26 @@
     }
 
     if (!checkBoundary(direction, directionValue)) {
-      console.log('1234')
-      position.oTop += directionValue[direction].oGradient
-      position.cTop += directionValue[direction].cGradient
+      currentPosition.oTop += directionValue[direction].oGradient
+      currentPosition.cTop += directionValue[direction].cGradient
     }
 
-    relative.body.style.top = position.oTop + 'px'
-    relative.content.style.top = position.cTop + 'px'
+    relative.body.style.top = currentPosition.oTop + 'px'
+    relative.content.style.top = currentPosition.cTop + 'px'
   }
 
   function checkBoundary (direction, value) {
     var result = false
     if (direction === 'down') {
-      if (position.cTop >= value['down'].boundaryCondition) {
-        position.cTop = value['down'].cBoundary
-        position.oTop = value['down'].oBoundary
+      if (currentPosition.cTop >= value['down'].boundaryCondition) {
+        currentPosition.cTop = value['down'].cBoundary
+        currentPosition.oTop = value['down'].oBoundary
         result = true
       }
     } else {
-      if (position.cTop <= value['up'].boundaryCondition) {
-        position.cTop = value['up'].cBoundary
-        position.oTop = value['up'].oBoundary
+      if (currentPosition.cTop <= value['up'].boundaryCondition) {
+        currentPosition.cTop = value['up'].cBoundary
+        currentPosition.oTop = value['up'].oBoundary
         result = true
       }
     }
@@ -331,7 +339,7 @@
       var event = event || window.event
       var relative = getRelativeEle(obj)
       var disY = event.clientY - relative.bg.scrollTop
-      position.oldClientY = disY
+      currentPosition.oldClientY = disY
       document.onmousemove = function (ev) {
         operate.move(relative, ev)
       }
