@@ -1,4 +1,4 @@
-<img style="display: flex" src="http://7xrp7o.com1.z0.glb.clouddn.com/sparrow.png" width="100" height="100" alt="">
+<img style="position: relative;left: 45%" src="http://7xrp7o.com1.z0.glb.clouddn.com/sparrow.png" width="100" height="100" alt="">
 # sjf-scroll
 > A simple custom scroll framework. It is made according to the browser's scroll bar. So it can support most browser's feature.For example, it supports the mousewheel, drag and click event etc.
 
