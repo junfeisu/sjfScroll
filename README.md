@@ -51,7 +51,7 @@ The sjf-scroll supports options for users to set
   * The option `delay` is to set the time the mouse is suspended in the sjf-scroll before executing other events
     (鼠标停留在sjf-scroll多久才会执行滚轮事件或者键盘事件)
 
-  * The option `gradient` is to set the unit of progress for wheel or keydown events
+  * The option `gradient` is to set the change unit of wheel or keydown events
     (滚一下滚动10px或者上翻10px)
 
 And now you can use sjf-scroll in your project easily
