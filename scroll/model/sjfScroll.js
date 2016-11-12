@@ -69,7 +69,7 @@
       var ctx = this, args = arguments;
       clearTimeout(last)
       last = setTimeout(function(){
-          action.apply(ctx, args)
+        action.apply(ctx, args)
       }, options.delay)
     }
   }
@@ -235,13 +235,16 @@
     var maxOTop = list.bodyHeight - list.selfHeight
     var upperBoundary = list.bgHeight - list.contentHeight / 2
     if (distance >= list.contentHeight / 2 && distance <= upperBoundary) {
+      console.log('123')
       position.cTop = distance - list.contentHeight / 2
-      position.oTop = -(list.contentHeight / 2 + distance) * 
+      position.oTop = -(distance - list.contentHeight / 2) * 
         (list.bodyHeight / list.selfHeight)
     } else if (distance < list.contentHeight / 2) {
+      console.log('234')
       position.cTop = 0
       position.oTop = 0
     } else if (distance > upperBoundary) {
+      console.log('345')
       position.cTop = maxCTop
       position.oTop = -maxOTop
     }
@@ -287,6 +290,7 @@
     }
 
     if (!checkBoundary(direction, directionValue)) {
+      console.log('1234')
       position.oTop += directionValue[direction].oGradient
       position.cTop += directionValue[direction].cGradient
     }
