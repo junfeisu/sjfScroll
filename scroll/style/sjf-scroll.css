@@ -1,3 +1,7 @@
+body {
+  -moz-user-select: none;
+}
+
 .sjf-scroll-wrapper {
   width: 95%;
   position: relative;

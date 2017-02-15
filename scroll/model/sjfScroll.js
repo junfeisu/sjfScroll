@@ -16,8 +16,6 @@
     gradient: 10
   }
 
-  
-  
   /*
    * This is the param for sjf-scroll postion 
    * @param cTop is the top of sjf-scroll-content
