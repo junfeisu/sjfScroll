@@ -141,6 +141,7 @@
     }
   }
 
+  // to set the height of scroll
   function setHeight (obj, maxHeight) {
     var wrapper = obj.querySelector('.sjf-scroll-wrapper')
     var bg = obj.querySelector('.sjf-scroll-bg')
@@ -149,9 +150,18 @@
     var offsetHeight = body.offsetHeight || body.clientHeight
 
     offsetHeight > maxHeight ? bg.style.display = 'block' : bg.style.display = 'none'
-    wrapper.style.height = maxHeight + 'px'
-    bg.style.height = maxHeight + 'px'
-    content.style.height = (maxHeight * maxHeight) / offsetHeight + 'px'
+    if (offsetHeight > maxHeight) {
+      console.log('bind')
+      bg.style.display = 'block'
+      bindEvent(obj)
+      wrapper.style.height = maxHeight + 'px'
+      bg.style.height = maxHeight + 'px'
+      content.style.height = (maxHeight * maxHeight) / offsetHeight + 'px'
+    } else {
+      console.log('cancel')
+      bg.style.display = 'none'
+      cancelBindEvent(obj)
+    }
 
     var observer = new MutationObserver(
       function callback() {
@@ -162,21 +172,12 @@
     observer.observe(body, mutationObserverConfig)
   }
 
-  /*
-   * rewrite the DOM structure of sjf-scroll
-   */
-  function rewriteDom (obj, maxHeight) {
-    var initHtml = obj.innerHTML
-    initHtml = '<div class="sjf-scroll-wrapper"><div class="sjf-scroll-body">' + initHtml + 
-      '</div><div class="sjf-scroll-bg"><span class="sjf-scroll-content"></span></div>'
-    obj.innerHTML = initHtml
-    
+  function bindEvent (obj) {
     var wrapper = obj.querySelector('.sjf-scroll-wrapper')
     var bg = obj.querySelector('.sjf-scroll-bg')
     var content = obj.querySelector('.sjf-scroll-content')
-
-    setHeight(obj, maxHeight)
     var isFirst = true
+
     wrapper.onmouseover = function (event) {
       if (isFirst) {
         var position = this.getAttribute('position')
@@ -208,6 +209,33 @@
     content.onmousedown = function (event) {
       operate.down(obj, event)
     }
+  }
+
+  function cancelBindEvent (obj) {
+    var wrapper = obj.querySelector('.sjf-scroll-wrapper')
+    var bg = obj.querySelector('.sjf-scroll-bg')
+    var content = obj.querySelector('.sjf-scroll-content')
+
+    wrapper.onmouseover = null
+    bg.onclick = null
+    content.onclick = null
+    content.onmousedown = null
+    obj.onmousewheel = null
+    obj.removeEventListener('DOMMouseScroll', function (ev) {
+      changeLocation(relative, ev, true)
+    }, false)
+  }
+
+  /*
+   * rewrite the DOM structure of sjf-scroll
+   */
+  function rewriteDom (obj, maxHeight) {
+    var initHtml = obj.innerHTML
+    initHtml = '<div class="sjf-scroll-wrapper"><div class="sjf-scroll-body">' + initHtml + 
+      '</div><div class="sjf-scroll-bg"><span class="sjf-scroll-content"></span></div>'
+    obj.innerHTML = initHtml
+    
+    setHeight(obj, maxHeight)
   }
 
   /*
