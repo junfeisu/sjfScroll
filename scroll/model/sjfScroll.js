@@ -16,6 +16,14 @@
     gradient: 10
   }
 
+  var MutationObserver = window.MutationObserver || window.WebkitMutationObserver
+    || window.MozMutationObserver
+
+  var mutationObserverConfig = {
+    childList: true,
+    subtree: true
+  }
+
   /*
    * This is the param for sjf-scroll postion 
    * @param cTop is the top of sjf-scroll-content
@@ -73,11 +81,11 @@
     if (!isObject(obj)) {
       console.warn('sjf-scroll:[warn] the param is not a object')
     } else {
-      observe (obj)
+      observeDom (obj)
     }
   }
   
-  function observe (obj) {
+  function observeDom (obj) {
     Object.keys(obj).forEach(function(key, index) {
       var val = obj[key]
       Object.defineProperty(obj, key, {
@@ -90,7 +98,7 @@
       }) 
       // For depth monitoring on object properties
       if (Object.prototype.toString.call(obj[key]) === '[object Object]') {
-        observe(obj[key])
+        observeDom(obj[key])
       }
     }, this)
   }
@@ -133,6 +141,27 @@
     }
   }
 
+  function setHeight (obj, maxHeight) {
+    var wrapper = obj.querySelector('.sjf-scroll-wrapper')
+    var bg = obj.querySelector('.sjf-scroll-bg')
+    var content = obj.querySelector('.sjf-scroll-content')
+    var body = obj.querySelector('.sjf-scroll-body')
+    var offsetHeight = body.offsetHeight || body.clientHeight
+
+    offsetHeight > maxHeight ? bg.style.display = 'block' : bg.style.display = 'none'
+    wrapper.style.height = maxHeight + 'px'
+    bg.style.height = maxHeight + 'px'
+    content.style.height = (maxHeight * maxHeight) / offsetHeight + 'px'
+
+    var observer = new MutationObserver(
+      function callback() {
+        setHeight(obj, maxHeight)
+      }
+    )
+
+    observer.observe(body, mutationObserverConfig)
+  }
+
   /*
    * rewrite the DOM structure of sjf-scroll
    */
@@ -145,14 +174,8 @@
     var wrapper = obj.querySelector('.sjf-scroll-wrapper')
     var bg = obj.querySelector('.sjf-scroll-bg')
     var content = obj.querySelector('.sjf-scroll-content')
-    var body = obj.querySelector('.sjf-scroll-body')
-    var offsetHeight = body.offsetHeight || body.clientHeight
 
-    offsetHeight > maxHeight ? bg.style.display = 'block' : bg.style.display = 'none'
-    wrapper.style.height = maxHeight + 'px'
-    bg.style.height = maxHeight + 'px'
-    content.style.height = (maxHeight * maxHeight) / offsetHeight + 'px'
-
+    setHeight(obj, maxHeight)
     var isFirst = true
     wrapper.onmouseover = function (event) {
       if (isFirst) {
@@ -379,6 +402,10 @@
   function initScroll () {
     watchOptions(options)
     getMaxHeight()
+  }
+
+  function onScroll () {
+
   }
 
   return {
