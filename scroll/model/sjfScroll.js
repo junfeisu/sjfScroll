@@ -24,6 +24,8 @@
     subtree: true
   }
 
+  var scrollCallBack = null
+
   /*
    * This is the param for sjf-scroll postion 
    * @param cTop is the top of sjf-scroll-content
@@ -32,14 +34,18 @@
    */
   var currentPosition = {}
 
-  // Determine whether as an object
+  /*
+   * Determine obj is an object or not
+   */
   function isObject (obj) {
     var result = true
     Object.prototype.toString.call(obj) === '[object Object]' ? '' : result = false
     return result
   }
 
-  // To get the dom for The corresponding event
+  /*
+   * To get the dom for The corresponding event
+   */
   function getRelativeEle (obj) {
     return {
       body: obj.querySelector('.sjf-scroll-body'),
@@ -48,8 +54,9 @@
       self: obj
     }
   }
-
-  // to get the height of the Specific dom
+  /*
+   * to get the height of the Specific dom
+   */
   function getRelativeHeight (obj) {
     return {
       bodyHeight: obj.querySelector('.sjf-scroll-body').offsetHeight,
@@ -110,7 +117,9 @@
     console.log('the new val is ' + val)
   }
 
-  // The interface for users to set options
+  /* 
+   * The interface for users to set options
+   */
   function setOptions (option) {
     if (!isObject(option)) {
       console.error('sjf-scroll:[error] options must be a object but ' + 
@@ -123,7 +132,9 @@
     }
   }
 
-  // get the living example entrance of sjf-scroll
+  /*
+   * get the living example entrance of sjf-scroll
+   */
   function getMaxHeight () {
     var scrolls = document.querySelectorAll('[sjf-scroll]')
     if (scrolls.length !== 0) {
@@ -141,7 +152,27 @@
     }
   }
 
-  // to set the height of scroll
+  /*
+   * rewrite the DOM structure of sjf-scroll
+   */
+  function rewriteDom (obj, maxHeight) {
+    var initHtml = obj.innerHTML
+    Array.prototype.forEach.call(obj.children, function (value) {
+      value.style.display = 'none'
+    })
+    initHtml = '<div class="sjf-scroll-body">' + initHtml + 
+      '</div><div class="sjf-scroll-bg"><span class="sjf-scroll-content"></span>'
+    var rewriteElement = document.createElement('div')
+    rewriteElement.setAttribute('class', 'sjf-scroll-wrapper')
+    rewriteElement.innerHTML = initHtml
+    obj.appendChild(rewriteElement)
+    
+    setHeight(obj, maxHeight)
+  }
+
+  /*
+   * to set the height of scroll
+   */ 
   function setHeight (obj, maxHeight) {
     var wrapper = obj.querySelector('.sjf-scroll-wrapper')
     var bg = obj.querySelector('.sjf-scroll-bg')
@@ -149,29 +180,28 @@
     var body = obj.querySelector('.sjf-scroll-body')
     var offsetHeight = body.offsetHeight || body.clientHeight
 
-    offsetHeight > maxHeight ? bg.style.display = 'block' : bg.style.display = 'none'
     if (offsetHeight > maxHeight) {
-      console.log('bind')
       bg.style.display = 'block'
       bindEvent(obj)
-      wrapper.style.height = maxHeight + 'px'
-      bg.style.height = maxHeight + 'px'
-      content.style.height = (maxHeight * maxHeight) / offsetHeight + 'px'
     } else {
-      console.log('cancel')
       bg.style.display = 'none'
       cancelBindEvent(obj)
     }
+    wrapper.style.height = maxHeight + 'px'
+    bg.style.height = maxHeight + 'px'
+    content.style.height = (maxHeight * maxHeight) / offsetHeight + 'px'
 
-    var observer = new MutationObserver(
-      function callback() {
-        setHeight(obj, maxHeight)
-      }
-    )
+    // to watch the change of dom structure of sjf-scroll-body
+    var observer = new MutationObserver(function () {
+      setHeight(obj, maxHeight)
+    })
 
-    observer.observe(body, mutationObserverConfig)
+    observer.observe(obj, mutationObserverConfig)
   }
 
+  /*
+   * to bind the relative event on the sjf-scroll
+   */
   function bindEvent (obj) {
     var wrapper = obj.querySelector('.sjf-scroll-wrapper')
     var bg = obj.querySelector('.sjf-scroll-bg')
@@ -211,6 +241,9 @@
     }
   }
 
+  /*
+   * cancel the event bind on the sjf-scroll
+   */
   function cancelBindEvent (obj) {
     var wrapper = obj.querySelector('.sjf-scroll-wrapper')
     var bg = obj.querySelector('.sjf-scroll-bg')
@@ -227,15 +260,10 @@
   }
 
   /*
-   * rewrite the DOM structure of sjf-scroll
+   * keep the html structure of old away with the html strcture of new 
    */
-  function rewriteDom (obj, maxHeight) {
-    var initHtml = obj.innerHTML
-    initHtml = '<div class="sjf-scroll-wrapper"><div class="sjf-scroll-body">' + initHtml + 
-      '</div><div class="sjf-scroll-bg"><span class="sjf-scroll-content"></span></div>'
-    obj.innerHTML = initHtml
+  function keepAway () {
     
-    setHeight(obj, maxHeight)
   }
 
   /*
@@ -257,7 +285,9 @@
     currentPosition.oldClientY = newEvent.clientY
   }
 
-  // check is to reach the boundary of drag event
+  /*
+   * check is to reach the boundary of drag event
+   */
   function moveBoundary (len, list) {
     if (len <= -currentPosition.cTop) {
       len = -currentPosition.cTop
@@ -267,7 +297,9 @@
     return len
   }
 
-  // direct change to the designated spot
+  /*
+   * change the position of sjf-scroll-content to the designated spot directly
+   */ 
   function scrollTo (param) {
     typeof param === 'undefined' ? 
       console.error('the sjfScroll.scrollTo needs a param {spot: , relativeDom}') : 
@@ -362,6 +394,9 @@
         currentPosition.cTop = value['down'].cBoundary
         currentPosition.oTop = value['down'].oBoundary
         result = true
+        if(scrollCallBack && typeof onScroll === 'function') {
+          scrollCallBack()
+        }
       }
     } else {
       if (currentPosition.cTop <= value['up'].boundaryCondition) {
@@ -426,19 +461,24 @@
     }
   }
 
-  // init the sjf-scroll
   function initScroll () {
     watchOptions(options)
     getMaxHeight()
   }
 
-  function onScroll () {
-
+  function onScroll (callback) {
+    if (!callback) {
+      console.warn('sjf-scroll:[warn] the sjfScroll.scroll need a argument to'
+       + ' as callback function but find none')
+    } else {
+      scrollCallBack = callback
+    }
   }
 
   return {
     initScroll: initScroll,
     setOptions: setOptions,
-    scrollTo: scrollTo
+    scrollTo: scrollTo,
+    scroll: onScroll
   }
 })
