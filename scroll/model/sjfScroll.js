@@ -179,7 +179,9 @@
     }
     wrapper.style.height = maxHeight + 'px'
     bg.style.height = maxHeight + 'px'
-    content.style.height = (maxHeight * maxHeight) / offsetHeight + 'px'
+    var prevHeight = (maxHeight * maxHeight) /offsetHeight
+    prevHeight = prevHeight <= 30 ? 30 : prevHeight
+    content.style.height = prevHeight + 'px'
   }
 
   /*
@@ -350,8 +352,10 @@
 
     var heightList = getRelativeHeight(relative.self)
 
-    // to judge the direction 
-    // and made special treatment to wheel events of firefox direction
+    /*
+     * to judge the direction 
+     * and made special treatment to wheel events of firefox direction
+     */ 
     var direction = 'down'
     if (typeof condition === 'boolean') {
       // this is the wheel event

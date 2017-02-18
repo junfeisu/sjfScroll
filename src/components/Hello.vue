@@ -1,6 +1,6 @@
 <template>
   <div class="hello">
-    <div sjf-scroll class="sjf-scroll">
+    <div sjf-scroll max-height="200" class="sjf-scroll">
       <p v-for="list in lists" v-text="list"></p>
     </div>
     <div sjf-scroll max-height="150" class="sjf-scroll">
