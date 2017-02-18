@@ -10,10 +10,12 @@
    * This is the options for sjf-scroll
    * @param delay is the time to deal the mouse events on the scroll-wrapper
    * @param gradient is the The unit of progress for wheel or keydown events
+   * @param minHeight is min height of .sjf-scroll-content
    */
   var options = {
-    delay: 1000,
-    gradient: 10
+    delay: 500,
+    gradient: 10,
+    minHeight: 30
   }
 
   var scrollCallBack = null
@@ -92,7 +94,7 @@
           return val
         },
         set: (function (newValue) {
-          dealOptions(newValue)
+          obj.key = newValue
         }).bind(this)
       }) 
       // For depth monitoring on object properties
@@ -168,8 +170,7 @@
     var content = obj.querySelector('.sjf-scroll-content')
     var body = obj.querySelector('.sjf-scroll-body')
     var offsetHeight = body.offsetHeight || body.clientHeight
-    console.log('offsetHeight is ' + offsetHeight)
-    console.log('maxHeight is ' + maxHeight)
+
     if (offsetHeight > maxHeight) {
       bg.style.display = 'block'
       bindEvent(obj)
@@ -180,7 +181,7 @@
     wrapper.style.height = maxHeight + 'px'
     bg.style.height = maxHeight + 'px'
     var prevHeight = (maxHeight * maxHeight) /offsetHeight
-    prevHeight = prevHeight <= 30 ? 30 : prevHeight
+    prevHeight = prevHeight > options.minHeight ? prevHeight : options.minHeight
     content.style.height = prevHeight + 'px'
   }
 
@@ -269,7 +270,8 @@
    */
   function keepAway (obj, maxHeight) {
     var newObj = obj.previousElementSibling
-    newObj.querySelector('.sjf-scroll-body').innerHTML = obj.innerHTML
+    var sjfScrollBody = newObj.querySelector('.sjf-scroll-body')
+    sjfScrollBody.innerHTML = obj.innerHTML
     setHeight(newObj, maxHeight)
   }
 

@@ -44,7 +44,6 @@ export default {
 
   .sjf-scroll {
     width: 50%;
-    // margin-top: 400px;
     p {
       color: red
     }

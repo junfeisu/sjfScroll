@@ -1,6 +1,7 @@
 body {
   /* 兼容Firefox避免拖动选中文本 */
   -moz-user-select: none;
+  -webkit-user-select: none;
 }
 
 .sjf-scroll-wrapper {
