@@ -156,7 +156,7 @@
       '</div><div class="sjf-scroll-bg"><span class="sjf-scroll-content"></span></div></div>'
     clonedObj.innerHTML = initHtml
     setHeight(clonedObj, maxHeight)
-    addMutationObserver(obj, clonedObj, maxHeight)
+    addMutationObserver(obj, maxHeight)
   }
 
   /*
@@ -168,7 +168,8 @@
     var content = obj.querySelector('.sjf-scroll-content')
     var body = obj.querySelector('.sjf-scroll-body')
     var offsetHeight = body.offsetHeight || body.clientHeight
-
+    console.log('offsetHeight is ' + offsetHeight)
+    console.log('maxHeight is ' + maxHeight)
     if (offsetHeight > maxHeight) {
       bg.style.display = 'block'
       bindEvent(obj)
@@ -266,7 +267,6 @@
    */
   function keepAway (obj, maxHeight) {
     var newObj = obj.previousElementSibling
-    console.log(obj.innerHTML)
     newObj.querySelector('.sjf-scroll-body').innerHTML = obj.innerHTML
     setHeight(newObj, maxHeight)
   }
