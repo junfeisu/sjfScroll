@@ -16,14 +16,6 @@
     gradient: 10
   }
 
-  var MutationObserver = window.MutationObserver || window.WebkitMutationObserver
-    || window.MozMutationObserver
-
-  var mutationObserverConfig = {
-    childList: true,
-    subtree: true
-  }
-
   var scrollCallBack = null
 
   /*
@@ -88,11 +80,11 @@
     if (!isObject(obj)) {
       console.warn('sjf-scroll:[warn] the param is not a object')
     } else {
-      observeDom (obj)
+      observe(obj)
     }
   }
   
-  function observeDom (obj) {
+  function observe (obj) {
     Object.keys(obj).forEach(function(key, index) {
       var val = obj[key]
       Object.defineProperty(obj, key, {
@@ -105,7 +97,7 @@
       }) 
       // For depth monitoring on object properties
       if (Object.prototype.toString.call(obj[key]) === '[object Object]') {
-        observeDom(obj[key])
+        observe(obj[key])
       }
     }, this)
   }
@@ -157,17 +149,14 @@
    */
   function rewriteDom (obj, maxHeight) {
     var initHtml = obj.innerHTML
-    Array.prototype.forEach.call(obj.children, function (value) {
-      value.style.display = 'none'
-    })
-    initHtml = '<div class="sjf-scroll-body">' + initHtml + 
-      '</div><div class="sjf-scroll-bg"><span class="sjf-scroll-content"></span>'
-    var rewriteElement = document.createElement('div')
-    rewriteElement.setAttribute('class', 'sjf-scroll-wrapper')
-    rewriteElement.innerHTML = initHtml
-    obj.appendChild(rewriteElement)
-    
-    setHeight(obj, maxHeight)
+    var clonedObj = obj.cloneNode(true)
+    obj.parentElement.insertBefore(clonedObj, obj)
+    obj.classList.add('hide-old')
+    initHtml = '<div class="sjf-scroll-wrapper"><div class="sjf-scroll-body">' + initHtml + 
+      '</div><div class="sjf-scroll-bg"><span class="sjf-scroll-content"></span></div></div>'
+    clonedObj.innerHTML = initHtml
+    setHeight(clonedObj, maxHeight)
+    addMutationObserver(obj, clonedObj, maxHeight)
   }
 
   /*
@@ -190,13 +179,26 @@
     wrapper.style.height = maxHeight + 'px'
     bg.style.height = maxHeight + 'px'
     content.style.height = (maxHeight * maxHeight) / offsetHeight + 'px'
+  }
 
-    // to watch the change of dom structure of sjf-scroll-body
-    var observer = new MutationObserver(function () {
-      setHeight(obj, maxHeight)
+  /*
+   * to watch the change of dom structure of hide-old
+   * @oldObj is the dom which is to be watched
+   */ 
+  function addMutationObserver (oldObj, maxHeight) {
+    var MutationObserver = window.MutationObserver || window.WebkitMutationObserver
+      || window.MozMutationObserver
+
+    var mutationObserverConfig = {
+      childList: true,
+      subtree: true
+    }
+
+    var observer = new MutationObserver(function (mutationRecord) {
+      keepAway(oldObj, maxHeight)
     })
 
-    observer.observe(obj, mutationObserverConfig)
+    observer.observe(oldObj, mutationObserverConfig)
   }
 
   /*
@@ -262,8 +264,11 @@
   /*
    * keep the html structure of old away with the html strcture of new 
    */
-  function keepAway () {
-    
+  function keepAway (obj, maxHeight) {
+    var newObj = obj.previousElementSibling
+    console.log(obj.innerHTML)
+    newObj.querySelector('.sjf-scroll-body').innerHTML = obj.innerHTML
+    setHeight(newObj, maxHeight)
   }
 
   /*

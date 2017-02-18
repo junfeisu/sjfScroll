@@ -19,11 +19,16 @@ export default {
       tests: [0, 1, 2]
     }
   },
+  methods: {
+    add () {
+      this.lists.push('a')
+    }
+  },
   mounted () {
     let self = this
     sjfScroll.initScroll()
     sjfScroll.scroll(function () {
-      self.lists.shift()
+      self.add()
     })
   }
 }
@@ -40,5 +45,8 @@ export default {
   .sjf-scroll {
     width: 50%;
     // margin-top: 400px;
+    p {
+      color: red
+    }
   }
 </style>

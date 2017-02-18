@@ -49,3 +49,7 @@ body {
 .sjf-scroll-content:hover {
   background: #333;
 }
+
+.hide-old {
+  display: none
+}
