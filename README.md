@@ -48,6 +48,7 @@ The sjf-scroll supports options for users to set
     {
       delay: 1000, // default value
       gradient: 10 // default value
+      minHeight: 30 // default value
     }
 
   * The option `delay` is to set the time the mouse is suspended in the sjf-scroll before executing other events
@@ -56,10 +57,13 @@ The sjf-scroll supports options for users to set
   * The option `gradient` is to set the change unit of wheel or keydown events
     (滚一下滚动10px或者上翻10px)
 
+  * The option `minHeight` is to set the min height of the sjf-scroll-content(the part is to show the progress of scroll)
+
   * the user to set the options API is sjfScroll.setOptions(param)
   
     the param is a object which contains one attribute or more of options
 
+  * the user can load some other thing through the sjfScroll.scroll to set the function of callback
+
 And now you can use sjf-scroll in your project easily
 
-For detailed explanation on how things work, checkout the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
