@@ -20,7 +20,7 @@ const transform = (env) => {
 
   let result = transformSource
   if (env === 'dev') {
-    result = result.pipe(gulp.dest('bulid/'))
+    result = result.pipe(gulp.dest('build/'))
   } else {
     result = result
                 .pipe(plugins.uglify())
