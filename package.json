@@ -4,25 +4,22 @@
   "description": "A simple custom scroll framework",
   "author": "sjffly <1982764150@qq.com>",
   "private": true,
-  "scripts": {},
+  "scripts": {
+    "dev": "gulp dev",
+    "build": "rm -rf dist/ && gulp"
+  },
   "devDependencies": {
-    "browser-sync": "^2.18.2",
+    "babel": "^6.23.0",
+    "babel-cli": "^6.26.0",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "babelify": "^8.0.0",
     "browserify": "^13.3.0",
     "bundle": "^0.2.3",
     "gulp": "^3.9.1",
-    "gulp-autoprefixer": "^3.1.0",
-    "gulp-cache": "^0.4.3",
-    "gulp-concat": "^2.6.0",
-    "gulp-imagemin": "^2.4.0",
-    "gulp-livereload": "^3.8.1",
     "gulp-load-plugins": "^1.2.4",
-    "gulp-minify-css": "^1.2.4",
-    "gulp-notify": "^2.2.0",
-    "gulp-plumber": "^1.1.0",
     "gulp-rename": "^1.2.2",
-    "gulp-sass": "^2.3.0",
     "gulp-uglify": "^1.5.4",
-    "standalonify": "^0.1.3",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0"
   },
@@ -30,5 +27,8 @@
     "node": ">= 4.0.0",
     "npm": ">= 3.0.0"
   },
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "babel-register": "^6.26.0"
+  }
 }
