@@ -3,6 +3,8 @@
   "version": "1.0.1",
   "description": "A simple custom scroll framework",
   "author": "sjffly <1982764150@qq.com>",
+  "main": "dist/sjfScroll.min.js",
+  "repository": "https://github.com/junfeisu/sjfScroll.git",
   "scripts": {
     "dev": "gulp dev",
     "build": "rm -rf dist/ && gulp"
