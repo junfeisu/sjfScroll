@@ -3,34 +3,17 @@
 </div>
 
 # sjf-scroll
-> A simple custom scroll framework. It is made according to the browser's scroll bar. So it can support most browser's feature.For example, it supports the mousewheel, drag and click event etc.
+> A simple custom scroll npm package. It is made according to the browser's scroll bar. So it can support most browser's feature.For example, it supports the mousewheel, drag and click event etc.
 
-## Build Setup
-
-``` bash
-# install dependencies
-npm install
-
-# serve with hot reload at localhost:8080 and you can through it to look the example of sjf-scroll
-npm run dev
-
-```
 ## Usage 
 
-  1. Import the sjf-scroll.css and sjfScroll.js into your project 
+  1. Install the npm package 
 
-        <link rel="stylesheet" href="http://7xrp7o.com1.z0.glb.clouddn.com/sjf-scroll.css">
-        <script src="http://7xrp7o.com1.z0.glb.clouddn.com/sjfScroll.js"></script>
+        npm install sjf-scroll
 
   2. Add the script to initialize sjfScroll after dom onloaded
 
-        window.onload = function () {
-          sjfScroll.initScroll()
-        }
-
-      if you use es6, you can do it like this:
-
-        import sjfScroll from 'http://7xrp7o.com1.z0.glb.clouddn.com/sjfScroll.js'
+        import sjfScroll from 'sjf-scroll'
         sjfScroll.initScroll()
 
   3. Add the entrance of the sjf-scroll.
